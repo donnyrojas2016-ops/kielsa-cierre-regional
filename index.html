@@ -438,17 +438,116 @@ textarea{
   font-size:11.5px; color:var(--muted);
 }
 .meta-row a{ color:var(--accent); }
+
+/* ---------- area badge ---------- */
+.area-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--accent-soft); color:var(--accent);
+  border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius:999px; padding:3px 10px 3px 8px;
+  font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+  margin-left:8px; vertical-align:middle;
+}
+
+/* ---------- session bar ---------- */
+.session-bar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  font-size:12px; color:var(--muted);
+}
+.session-bar b{ color:var(--ink-2); }
+.scope-pill{
+  font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
+  background:var(--surface-2); border:1px solid var(--line-strong); color:var(--ink-2);
+  border-radius:999px; padding:3px 9px;
+}
+
+/* ---------- auth screen ---------- */
+.auth-overlay{
+  position:fixed; inset:0; z-index:50;
+  background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+}
+.auth-card{
+  width:100%; max-width:380px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  padding:28px 26px 24px;
+}
+.auth-card h2{ margin:0 0 4px; font-size:19px; letter-spacing:-.01em; }
+.auth-card .subtitle{ margin:0 0 20px; }
+.auth-field{ margin-bottom:14px; }
+.auth-field label{
+  display:block; font-size:11px; font-weight:600; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--muted); margin-bottom:6px;
+}
+.auth-field input{
+  width:100%; font-family:inherit; font-size:14px; color:var(--ink);
+  background:var(--surface-2); border:1px solid var(--line-strong);
+  border-radius:8px; padding:10px 11px;
+}
+.auth-field input:focus{ outline:none; box-shadow:var(--focus); }
+.auth-actions{ display:flex; flex-direction:column; gap:8px; margin-top:18px; }
+.auth-actions button{ width:100%; padding:10px 12px; }
+.auth-switch{
+  margin-top:16px; font-size:12.5px; color:var(--muted); text-align:center;
+}
+.auth-switch a{ color:var(--accent); cursor:pointer; font-weight:600; }
+.auth-msg{
+  font-size:12.5px; border-radius:8px; padding:9px 11px; margin-bottom:14px;
+  display:none;
+}
+.auth-msg.show{ display:block; }
+.auth-msg.error{ background:var(--bad-soft); color:var(--bad); }
+.auth-msg.ok{ background:var(--ok-soft); color:var(--ok); }
+.auth-forgot{ text-align:right; margin:-6px 0 14px; }
+.auth-forgot a{ font-size:11.5px; color:var(--accent); cursor:pointer; }
+[hidden]{ display:none !important; }
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<!-- ---------- login / signup screen ---------- -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <h2 id="authTitle">Iniciar sesi&oacute;n</h2>
+    <p class="subtitle" id="authSubtitle">Checklist de cierre regional &middot; Auditor&iacute;a Kielsa</p>
+    <div class="auth-msg" id="authMsg"></div>
+    <form id="authForm">
+      <div class="auth-field">
+        <label for="authEmail">Correo</label>
+        <input type="email" id="authEmail" autocomplete="username" placeholder="nombre@kielsa.hn" required />
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Contrase&ntilde;a</label>
+        <input type="password" id="authPassword" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required minlength="6" />
+      </div>
+      <div class="auth-forgot"><a id="authForgot">&iquest;Olvidaste tu contrase&ntilde;a?</a></div>
+      <div class="auth-actions">
+        <button type="submit" class="primary" id="authSubmit">Entrar</button>
+      </div>
+    </form>
+    <div class="auth-switch">
+      <span id="authSwitchToSignup">&iquest;Primera vez? <a id="authGoSignup">Crea tu cuenta</a></span>
+      <span id="authSwitchToLogin" hidden>&iquest;Ya tienes cuenta? <a id="authGoLogin">Inicia sesi&oacute;n</a></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="appWrap" hidden>
 
   <header>
     <div>
-      <p class="eyebrow">Control regional &middot; Finanzas &middot; Kielsa</p>
+      <p class="eyebrow">Control regional &middot; Finanzas &middot; Kielsa<span class="area-badge">&Aacute;rea: Checklist</span></p>
       <h1>Cierre Contable Regional</h1>
       <p class="subtitle">Seguimiento mensual de las actividades de cierre contable por empresa, a nivel regional.</p>
+      <div class="session-bar" style="margin-top:10px;">
+        <span>Sesi&oacute;n: <b id="sessionName">&mdash;</b></span>
+        <span class="scope-pill" id="scopePill">&mdash;</span>
+        <button class="ghost" id="btnLogout" type="button" style="padding:4px 8px;">Cerrar sesi&oacute;n</button>
+      </div>
     </div>
     <div class="controls">
       <span class="sync" id="syncIndicator"><span class="dot"></span><span id="syncText">Conectando&hellip;</span></span>
@@ -576,6 +675,29 @@ textarea{
   COUNTRIES.forEach(function(c){ c.companies.forEach(function(co){ COMPANIES.push(co); co.countryId = c.id; }); });
   var ACTIVITIES = [];
   GROUPS.forEach(function(g){ g.activities.forEach(function(a){ ACTIVITIES.push(a); }); });
+  var COMPANY_BY_ID = {};
+  COMPANIES.forEach(function(co){ COMPANY_BY_ID[co.id] = co; });
+
+  // ---------------------------------------------------------------
+  // Real auditors (from Kielsa CI / Supabase "auditores" + "paises"),
+  // one Firebase account per person, self-registered on first login.
+  // Country ids match COUNTRIES[].id above.
+  // ---------------------------------------------------------------
+  var ALL_COUNTRY_IDS = COUNTRIES.map(function(c){ return c.id; });
+  var AUDITORS = {
+    'drojas@kielsa.hn':            { name:'Donny Rojas',               countries: ALL_COUNTRY_IDS.slice() },
+    'jolopez@kielsa.hn':           { name:'Jonatan Lopez',              countries:['hn'] },
+    'ycarcamo@kielsa.hn':          { name:'Yulia Carcamo',              countries:['hn'] },
+    'kicruz@kielsa.hn':            { name:'Kaleb Cruz',                 countries:['hn'] },
+    'lazapata@kielsa.com.ni':      { name:'Luis Gaitan',                countries:['ni'] },
+    'auditor@laarboleda.co.cr':    { name:'Gabriel Barquero',           countries:['cr'] },
+    'vayala@kielsa.hn':            { name:'Vladimir Ayala',             countries:['sv'] },
+    'oxitumul@farmaciasherdez.com':{ name:'Olinda Xitumul',             countries:['gt'] },
+    'szavala@kielsa.hn':           { name:'Stephany Zvala',             countries: ALL_COUNTRY_IDS.slice() },
+    'dandino@kielsa.hn':           { name:'Darwin Andino',              countries:['hn'] }
+  };
+  var COUNTRY_NAME = {};
+  COUNTRIES.forEach(function(c){ COUNTRY_NAME[c.id] = c.name; });
 
   var STATES = ['si','no','na','pendiente'];
   var STATE_LABEL = { si:'Sí', no:'No', na:'N/A', pendiente:'Sin revisar' };
@@ -621,6 +743,17 @@ textarea{
   var obsSaveTimer = null;
   var obsDirty = false;
   var ready = false;
+  var currentAuditor = null;   // { name, countries } for the signed-in user, or null
+  var currentEmail = null;
+
+  function canEditCompany(companyId){
+    if (!currentAuditor) return false;
+    var co = COMPANY_BY_ID[companyId];
+    return !!co && currentAuditor.countries.indexOf(co.countryId) !== -1;
+  }
+  function isAdmin(){
+    return !!currentAuditor && currentAuditor.countries.length >= ALL_COUNTRY_IDS.length;
+  }
 
   var monthSelect = document.getElementById('monthSelect');
   var syncText = document.getElementById('syncText');
@@ -759,11 +892,14 @@ textarea{
     var table = document.getElementById('matrixTable');
     table.querySelectorAll('button.cell').forEach(function(btn){
       var k = btn.getAttribute('data-key');
+      var companyId = btn.closest('td') ? btn.closest('td').getAttribute('data-company') : null;
       var v = statuses[k] || 'pendiente';
       btn.className = 'cell ' + v;
       btn.textContent = STATE_LABEL[v];
       btn.setAttribute('aria-label', STATE_LABEL[v]);
-      btn.disabled = !ready;
+      var editable = ready && canEditCompany(companyId);
+      btn.disabled = !editable;
+      btn.title = editable ? '' : 'Solo lectura: fuera de tu país asignado';
     });
   }
 
@@ -800,6 +936,8 @@ textarea{
 
   function cycleCell(k){
     if (!ready) return;
+    var companyId = k.split('__')[1];
+    if (!canEditCompany(companyId)) return;
     var cur = docState.statuses[k] || 'pendiente';
     var idx = STATES.indexOf(cur);
     var next = STATES[(idx+1) % STATES.length];
@@ -885,7 +1023,107 @@ textarea{
   });
 
   // ---------------------------------------------------------------
-  // Boot: init Firebase, sign in anonymously, then subscribe
+  // Auth screen wiring (login / self-registro / recuperar contraseña)
+  // ---------------------------------------------------------------
+  var authOverlay = document.getElementById('authOverlay');
+  var appWrap = document.getElementById('appWrap');
+  var authForm = document.getElementById('authForm');
+  var authEmail = document.getElementById('authEmail');
+  var authPassword = document.getElementById('authPassword');
+  var authMsg = document.getElementById('authMsg');
+  var authTitle = document.getElementById('authTitle');
+  var authSubmit = document.getElementById('authSubmit');
+  var authMode = 'login'; // 'login' | 'signup'
+
+  function showAuthMsg(text, type){
+    authMsg.textContent = text;
+    authMsg.className = 'auth-msg show' + (type ? ' ' + type : '');
+  }
+  function clearAuthMsg(){ authMsg.className = 'auth-msg'; authMsg.textContent = ''; }
+
+  function setAuthMode(mode){
+    authMode = mode;
+    clearAuthMsg();
+    if (mode === 'signup'){
+      authTitle.textContent = 'Crear cuenta';
+      authSubmit.textContent = 'Crear cuenta';
+      authPassword.setAttribute('autocomplete','new-password');
+      document.getElementById('authSwitchToSignup').hidden = true;
+      document.getElementById('authSwitchToLogin').hidden = false;
+    } else {
+      authTitle.textContent = 'Iniciar sesión';
+      authSubmit.textContent = 'Entrar';
+      authPassword.setAttribute('autocomplete','current-password');
+      document.getElementById('authSwitchToSignup').hidden = false;
+      document.getElementById('authSwitchToLogin').hidden = true;
+    }
+  }
+  document.getElementById('authGoSignup').addEventListener('click', function(){ setAuthMode('signup'); });
+  document.getElementById('authGoLogin').addEventListener('click', function(){ setAuthMode('login'); });
+
+  document.getElementById('authForgot').addEventListener('click', function(){
+    var email = (authEmail.value || '').trim().toLowerCase();
+    if (!email){ showAuthMsg('Escribe tu correo arriba y luego pulsa "¿Olvidaste tu contraseña?".', 'error'); return; }
+    firebase.auth().sendPasswordResetEmail(email).then(function(){
+      showAuthMsg('Te enviamos un enlace a ' + email + ' para crear una nueva contraseña.', 'ok');
+    }).catch(function(err){
+      showAuthMsg(authErrorMessage(err), 'error');
+    });
+  });
+
+  function authErrorMessage(err){
+    var code = err && err.code;
+    if (code === 'auth/user-not-found') return 'No existe una cuenta con ese correo. Si es tu primera vez, usa "Crea tu cuenta".';
+    if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Contraseña incorrecta.';
+    if (code === 'auth/email-already-in-use') return 'Ya existe una cuenta con ese correo. Usa "Inicia sesión".';
+    if (code === 'auth/weak-password') return 'La contraseña debe tener al menos 6 caracteres.';
+    if (code === 'auth/invalid-email') return 'Correo inválido.';
+    if (code === 'auth/too-many-requests') return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+    return 'No se pudo completar la solicitud. Intenta de nuevo.';
+  }
+
+  authForm.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var email = (authEmail.value || '').trim().toLowerCase();
+    var password = authPassword.value || '';
+    clearAuthMsg();
+
+    if (authMode === 'signup'){
+      if (!AUDITORS[email]){
+        showAuthMsg('Este correo no está en la lista de auditores autorizados. Contacta a Donny Rojas (drojas@kielsa.hn) para que te agregue.', 'error');
+        return;
+      }
+      authSubmit.disabled = true;
+      firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(err){
+        showAuthMsg(authErrorMessage(err), 'error');
+      }).finally(function(){ authSubmit.disabled = false; });
+    } else {
+      authSubmit.disabled = true;
+      firebase.auth().signInWithEmailAndPassword(email, password).catch(function(err){
+        showAuthMsg(authErrorMessage(err), 'error');
+      }).finally(function(){ authSubmit.disabled = false; });
+    }
+  });
+
+  document.getElementById('btnLogout').addEventListener('click', function(){
+    firebase.auth().signOut();
+  });
+
+  function applyAuditorUI(){
+    var nameEl = document.getElementById('sessionName');
+    var pillEl = document.getElementById('scopePill');
+    if (currentAuditor){
+      nameEl.textContent = currentAuditor.name + ' (' + currentEmail + ')';
+      pillEl.textContent = isAdmin() ? 'Edita: todos los países' : 'Edita: ' + currentAuditor.countries.map(function(id){ return COUNTRY_NAME[id]; }).join(', ');
+    } else {
+      nameEl.textContent = currentEmail || '—';
+      pillEl.textContent = 'Solo lectura (correo no registrado como auditor)';
+    }
+    document.getElementById('toggleNewMonth').hidden = !isAdmin();
+  }
+
+  // ---------------------------------------------------------------
+  // Boot: init Firebase, render skeleton, then react to auth state
   // ---------------------------------------------------------------
   renderMatrixSkeleton();
   ensureMonthOption('2026-09', true);
@@ -899,7 +1137,14 @@ textarea{
     db = firebase.firestore();
 
     auth.onAuthStateChanged(function(user){
-      if (user){
+      if (user && !user.isAnonymous && user.email){
+        currentEmail = user.email.toLowerCase();
+        currentAuditor = AUDITORS[currentEmail] || null;
+        applyAuditorUI();
+
+        authOverlay.hidden = true;
+        appWrap.hidden = false;
+
         ready = true;
         syncText.textContent = 'Sincronizado';
         syncIndicator.classList.remove('offline','error');
@@ -909,22 +1154,21 @@ textarea{
         }).catch(function(){
           subscribeMonth(monthSelect.value || '2026-09');
         });
+      } else {
+        // Signed out (or an old anonymous session) -> show login screen
+        ready = false;
+        currentAuditor = null;
+        currentEmail = null;
+        if (unsub){ unsub(); unsub = null; }
+        authOverlay.hidden = false;
+        appWrap.hidden = true;
+        authPassword.value = '';
+        setAuthMode('login');
       }
-    });
-
-    auth.signInAnonymously().catch(function(err){
-      console.error('auth failed', err);
-      syncText.textContent = 'Sin conexión (revisa tu internet)';
-      syncIndicator.classList.add('error');
-      docState = { statuses: buildSeed(), notes:'', updatedAt:null };
-      renderAll();
     });
   } catch(e){
     console.error('firebase init failed', e);
-    syncText.textContent = 'Modo local (sin sincronización)';
-    syncIndicator.classList.add('offline');
-    docState = { statuses: buildSeed(), notes:'', updatedAt:null };
-    renderAll();
+    showAuthMsg('No se pudo conectar con el servidor. Revisa tu conexión a internet.', 'error');
   }
 
 })();
