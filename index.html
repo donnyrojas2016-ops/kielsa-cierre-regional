@@ -461,6 +461,60 @@ textarea{
   border-radius:999px; padding:3px 9px;
 }
 
+/* ---------- topbar ---------- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  padding:16px 0 18px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:24px;
+}
+.topbar-brand{ display:flex; align-items:center; gap:9px; }
+.topbar-brand .logo-dot{ width:10px; height:10px; border-radius:3px; background:var(--accent); flex:none; }
+.topbar-brand b{ font-size:14.5px; letter-spacing:-.01em; }
+
+/* ---------- areas view ---------- */
+.areas-head h1{ font-size:23px; margin:0 0 4px; }
+.areas-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(190px,1fr));
+  gap:14px;
+  margin-top:22px;
+  margin-bottom:40px;
+}
+.area-card{
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px 16px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  font-family:inherit;
+  transition:border-color .12s ease, transform .08s ease;
+}
+.area-card:hover{ border-color:var(--accent); }
+.area-card:active{ transform:translateY(1px); }
+.area-card .area-code{
+  font-size:10.5px; font-weight:600; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.area-card .area-name{ font-size:14.5px; font-weight:600; color:var(--ink); margin-top:6px; }
+.area-card .area-hint{ font-size:11px; color:var(--muted); margin-top:10px; }
+.area-card.active{
+  border-color:var(--accent);
+  background:linear-gradient(155deg, var(--accent-soft), var(--surface) 65%);
+}
+.area-card.active .area-name{ color:var(--accent); }
+.area-card.active .area-hint{ color:var(--accent); font-weight:600; }
+.area-card.disabled{ cursor:not-allowed; opacity:.5; }
+.back-link{
+  display:inline-flex; align-items:center; gap:4px;
+  background:transparent; border:none; color:var(--accent);
+  font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+  padding:0; margin-bottom:16px;
+}
+.back-link:hover{ text-decoration:underline; }
+
 /* ---------- auth screen ---------- */
 .auth-overlay{
   position:fixed; inset:0; z-index:50;
@@ -538,83 +592,93 @@ textarea{
 
 <div class="wrap" id="appWrap" hidden>
 
-  <header>
-    <div>
-      <p class="eyebrow">Control regional &middot; Finanzas &middot; Kielsa<span class="area-badge">&Aacute;rea: Checklist</span></p>
-      <h1>Cierre Contable Regional</h1>
-      <p class="subtitle">Seguimiento mensual de las actividades de cierre contable por empresa, a nivel regional.</p>
-      <div class="session-bar" style="margin-top:10px;">
-        <span>Sesi&oacute;n: <b id="sessionName">&mdash;</b></span>
-        <span class="scope-pill" id="scopePill">&mdash;</span>
-        <button class="ghost" id="btnLogout" type="button" style="padding:4px 8px;">Cerrar sesi&oacute;n</button>
+  <div class="topbar">
+    <div class="topbar-brand"><span class="logo-dot"></span><b>Auditor&iacute;a Kielsa</b></div>
+    <div class="session-bar">
+      <span>Sesi&oacute;n: <b id="sessionName">&mdash;</b></span>
+      <span class="scope-pill" id="scopePill">&mdash;</span>
+      <button class="ghost" id="btnLogout" type="button" style="padding:4px 8px;">Cerrar sesi&oacute;n</button>
+    </div>
+  </div>
+
+  <div id="areasView">
+    <div class="areas-head">
+      <p class="eyebrow">Auditor&iacute;a Kielsa &middot; Estructura regional</p>
+      <h1>&Aacute;reas</h1>
+      <p class="subtitle">Selecciona un &aacute;rea para continuar. El &aacute;rea <b>Checklist</b> contiene el cierre contable regional.</p>
+    </div>
+    <div class="areas-grid" id="areasGrid" aria-label="Listado de &aacute;reas"></div>
+  </div>
+
+  <div id="checklistView" hidden>
+    <button type="button" class="back-link" id="btnBackAreas">&larr; &Aacute;reas</button>
+
+    <header>
+      <div>
+        <p class="eyebrow">Control regional &middot; Finanzas &middot; Kielsa<span class="area-badge">&Aacute;rea: Checklist</span></p>
+        <h1>Cierre Contable Regional</h1>
+        <p class="subtitle">Seguimiento mensual de las actividades de cierre contable por empresa, a nivel regional.</p>
       </div>
-    </div>
-    <div class="controls">
-      <span class="sync" id="syncIndicator"><span class="dot"></span><span id="syncText">Conectando&hellip;</span></span>
-      <span class="field-label">Mes evaluado</span>
-      <select id="monthSelect" aria-label="Mes evaluado"></select>
-      <button class="ghost" id="toggleNewMonth" type="button">+ Nuevo mes</button>
-      <div class="newmonth-panel" id="newMonthPanel">
-        <input type="month" id="newMonthInput" />
-        <button type="button" id="btnNewBlank">Vac&iacute;o</button>
-        <button type="button" class="primary" id="btnNewDup">Duplicar mes actual</button>
+      <div class="controls">
+        <span class="sync" id="syncIndicator"><span class="dot"></span><span id="syncText">Conectando&hellip;</span></span>
+        <span class="field-label">Mes evaluado</span>
+        <select id="monthSelect" aria-label="Mes evaluado"></select>
+        <button class="ghost" id="toggleNewMonth" type="button">+ Nuevo mes</button>
+        <div class="newmonth-panel" id="newMonthPanel">
+          <input type="month" id="newMonthInput" />
+          <button type="button" id="btnNewBlank">Vac&iacute;o</button>
+          <button type="button" class="primary" id="btnNewDup">Duplicar mes actual</button>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <section class="summary" id="summaryTiles" aria-label="Resumen de cumplimiento"></section>
+    <section class="summary" id="summaryTiles" aria-label="Resumen de cumplimiento"></section>
 
-  <section class="matrix-card">
-    <div class="matrix-scroll">
-      <table class="matrix" id="matrixTable" aria-label="Matriz de actividades de cierre por empresa"></table>
-    </div>
-  </section>
-
-  <section class="footer-grid">
-    <div class="note-card">
-      <div class="legend" style="margin-bottom:10px;">
-        <span class="legend-item"><span class="legend-swatch si"></span>S&iacute; &mdash; completado</span>
-        <span class="legend-item"><span class="legend-swatch no"></span>No &mdash; pendiente de cerrar</span>
-        <span class="legend-item"><span class="legend-swatch na"></span>N/A &mdash; no aplica</span>
-        <span class="legend-item"><span class="legend-swatch pendiente"></span>Sin revisar</span>
+    <section class="matrix-card">
+      <div class="matrix-scroll">
+        <table class="matrix" id="matrixTable" aria-label="Matriz de actividades de cierre por empresa"></table>
       </div>
-      <div>Clic sobre una celda para cambiar su estado (S&iacute; &rarr; No &rarr; N/A &rarr; Sin revisar).</div>
-      <div style="margin-top:8px;"><b>Fecha l&iacute;mite de publicaci&oacute;n:</b> d&iacute;a 6 de cada mes, hasta finalizar el proceso de cierre regional.</div>
-    </div>
-    <div class="obs-card">
-      <label for="obsInput">Observaciones del mes</label>
-      <textarea id="obsInput" placeholder="Notas del equipo regional sobre el cierre de este mes&hellip;"></textarea>
-      <div class="save-hint" id="obsHint"></div>
-    </div>
-  </section>
+    </section>
 
-  <div class="meta-row">
-    <span id="lastUpdated">&nbsp;</span>
-    <span>Datos compartidos en tiempo real entre todo el equipo regional.</span>
+    <section class="footer-grid">
+      <div class="note-card">
+        <div class="legend" style="margin-bottom:10px;">
+          <span class="legend-item"><span class="legend-swatch si"></span>S&iacute; &mdash; completado</span>
+          <span class="legend-item"><span class="legend-swatch no"></span>No &mdash; pendiente de cerrar</span>
+          <span class="legend-item"><span class="legend-swatch na"></span>N/A &mdash; no aplica</span>
+          <span class="legend-item"><span class="legend-swatch pendiente"></span>Sin revisar</span>
+        </div>
+        <div>Clic sobre una celda para cambiar su estado (S&iacute; &rarr; No &rarr; N/A &rarr; Sin revisar).</div>
+        <div style="margin-top:8px;"><b>Fecha l&iacute;mite de publicaci&oacute;n:</b> d&iacute;a 6 de cada mes, hasta finalizar el proceso de cierre regional.</div>
+      </div>
+      <div class="obs-card">
+        <label for="obsInput">Observaciones del mes</label>
+        <textarea id="obsInput" placeholder="Notas del equipo regional sobre el cierre de este mes&hellip;"></textarea>
+        <div class="save-hint" id="obsHint"></div>
+      </div>
+    </section>
+
+    <div class="meta-row">
+      <span id="lastUpdated">&nbsp;</span>
+      <span>Datos compartidos en tiempo real entre todo el equipo regional.</span>
+    </div>
   </div>
 
 </div>
 
-<!-- Firebase (compat SDK, loaded as plain scripts — no bundler needed) -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<!-- Supabase (same project as Kielsa CI: auditores, países, áreas reales) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 (function(){
 
   // ---------------------------------------------------------------
-  // Firebase project: Auditoria Kielsa (console.firebase.google.com)
+  // Supabase project: kielsa-ci (same database as Kielsa CI — real
+  // auditores / países / áreas live here, plus our own table
+  // "cierre_regional_estados" for the checklist statuses).
   // ---------------------------------------------------------------
-  var firebaseConfig = {
-    apiKey: "AIzaSyD9mppZq8vyfFU2qvn3KyYVcJyJwLxhYe0",
-    authDomain: "auditoria-kielsa.firebaseapp.com",
-    projectId: "auditoria-kielsa",
-    storageBucket: "auditoria-kielsa.firebasestorage.app",
-    messagingSenderId: "10233348695",
-    appId: "1:10233348695:web:e29fdee6ca88c60037d912",
-    measurementId: "G-66KMMD0ELG"
-  };
+  var SUPABASE_URL = "https://jvithjvoyvxeljlectli.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_s4Osr9pmviPCX6xfKrJQ2Q_vyKwmks-";
 
   // ---------------------------------------------------------------
   // Static structure: countries, companies, activity groups
@@ -679,23 +743,15 @@ textarea{
   COMPANIES.forEach(function(co){ COMPANY_BY_ID[co.id] = co; });
 
   // ---------------------------------------------------------------
-  // Real auditors (from Kielsa CI / Supabase "auditores" + "paises"),
-  // one Firebase account per person, self-registered on first login.
-  // Country ids match COUNTRIES[].id above.
+  // Real auditors, countries and áreas: fetched live from Supabase
+  // ("auditores", "paises", "areas" — the same tables Kielsa CI uses)
+  // instead of hardcoded, via loadDirectory() near boot, below.
+  // Country ids match COUNTRIES[].id above; auditores.pais_ids (numeric,
+  // referencing paises.id) is translated to those ids using paises.codigo.
   // ---------------------------------------------------------------
   var ALL_COUNTRY_IDS = COUNTRIES.map(function(c){ return c.id; });
-  var AUDITORS = {
-    'drojas@kielsa.hn':            { name:'Donny Rojas',               countries: ALL_COUNTRY_IDS.slice() },
-    'jolopez@kielsa.hn':           { name:'Jonatan Lopez',              countries:['hn'] },
-    'ycarcamo@kielsa.hn':          { name:'Yulia Carcamo',              countries:['hn'] },
-    'kicruz@kielsa.hn':            { name:'Kaleb Cruz',                 countries:['hn'] },
-    'lazapata@kielsa.com.ni':      { name:'Luis Gaitan',                countries:['ni'] },
-    'auditor@laarboleda.co.cr':    { name:'Gabriel Barquero',           countries:['cr'] },
-    'vayala@kielsa.hn':            { name:'Vladimir Ayala',             countries:['sv'] },
-    'oxitumul@farmaciasherdez.com':{ name:'Olinda Xitumul',             countries:['gt'] },
-    'szavala@kielsa.hn':           { name:'Stephany Zvala',             countries: ALL_COUNTRY_IDS.slice() },
-    'dandino@kielsa.hn':           { name:'Darwin Andino',              countries:['hn'] }
-  };
+  var AUDITORS = {};       // filled by loadDirectory(): email -> { name, countries }
+  var AREAS = [];          // filled by loadDirectory(): real "areas" table rows
   var COUNTRY_NAME = {};
   COUNTRIES.forEach(function(c){ COUNTRY_NAME[c.id] = c.name; });
 
@@ -918,19 +974,23 @@ textarea{
   }
 
   // ---------------------------------------------------------------
-  // Persistence (Firestore, collection "cierreRegional", one doc per month)
+  // Persistence (Supabase table "cierre_regional_estados", one row per month)
   // ---------------------------------------------------------------
   function writeDoc(){
     if (!db || !ready) return;
     docState.updatedAt = new Date().toISOString();
-    db.collection('cierreRegional').doc(currentMonth).set({
+    db.from('cierre_regional_estados').upsert({
+      mes: currentMonth,
       statuses: docState.statuses,
       notes: docState.notes || '',
-      updatedAt: docState.updatedAt
-    }).catch(function(e){
-      console.error('write failed', e);
-      syncText.textContent = 'Error al guardar';
-      syncIndicator.classList.add('error');
+      updated_at: docState.updatedAt,
+      updated_by: currentEmail || null
+    }).then(function(res){
+      if (res.error){
+        console.error('write failed', res.error);
+        syncText.textContent = 'Error al guardar';
+        syncIndicator.classList.add('error');
+      }
     });
   }
 
@@ -947,29 +1007,43 @@ textarea{
     writeDoc();
   }
 
+  function applyRow(row){
+    docState.statuses = (row && row.statuses) || {};
+    docState.notes = (row && row.notes) || '';
+    docState.updatedAt = (row && row.updated_at) || null;
+  }
+
   function subscribeMonth(id){
-    if (unsub) { unsub(); unsub = null; }
+    if (unsub) { unsub.unsubscribe(); unsub = null; }
     currentMonth = id;
     docState = { statuses:{}, notes:'', updatedAt:null };
     renderAll();
     if (!db) return;
-    var ref = db.collection('cierreRegional').doc(id);
-    unsub = ref.onSnapshot(function(snap){
-      if (snap.exists){
-        var data = snap.data();
-        docState.statuses = data.statuses || {};
-        docState.notes = data.notes || '';
-        docState.updatedAt = data.updatedAt || null;
+
+    db.from('cierre_regional_estados').select('*').eq('mes', id).maybeSingle().then(function(res){
+      if (res.error){
+        console.warn('read error', res.error);
+        syncText.textContent = 'Sin conexión en vivo';
+        syncIndicator.classList.add('offline');
+        return;
+      }
+      if (res.data){
+        applyRow(res.data);
       } else {
         docState = { statuses: id === '2026-09' ? buildSeed() : {}, notes:'', updatedAt:null };
         if (id === '2026-09'){ writeDoc(); }
       }
       renderAll();
-    }, function(err){
-      console.warn('snapshot error', err);
-      syncText.textContent = 'Sin conexión en vivo';
-      syncIndicator.classList.add('offline');
     });
+
+    unsub = db
+      .channel('cierre_regional_estados_' + id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cierre_regional_estados', filter: 'mes=eq.' + id }, function(payload){
+        if (payload.eventType === 'DELETE') return;
+        applyRow(payload.new);
+        renderAll();
+      })
+      .subscribe();
   }
 
   // ---------------------------------------------------------------
@@ -1064,22 +1138,21 @@ textarea{
   document.getElementById('authForgot').addEventListener('click', function(){
     var email = (authEmail.value || '').trim().toLowerCase();
     if (!email){ showAuthMsg('Escribe tu correo arriba y luego pulsa "¿Olvidaste tu contraseña?".', 'error'); return; }
-    firebase.auth().sendPasswordResetEmail(email).then(function(){
+    sb.auth.resetPasswordForEmail(email).then(function(res){
+      if (res.error){ showAuthMsg(authErrorMessage(res.error), 'error'); return; }
       showAuthMsg('Te enviamos un enlace a ' + email + ' para crear una nueva contraseña.', 'ok');
-    }).catch(function(err){
-      showAuthMsg(authErrorMessage(err), 'error');
     });
   });
 
   function authErrorMessage(err){
-    var code = err && err.code;
-    if (code === 'auth/user-not-found') return 'No existe una cuenta con ese correo. Si es tu primera vez, usa "Crea tu cuenta".';
-    if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Contraseña incorrecta.';
-    if (code === 'auth/email-already-in-use') return 'Ya existe una cuenta con ese correo. Usa "Inicia sesión".';
-    if (code === 'auth/weak-password') return 'La contraseña debe tener al menos 6 caracteres.';
-    if (code === 'auth/invalid-email') return 'Correo inválido.';
-    if (code === 'auth/too-many-requests') return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
-    return 'No se pudo completar la solicitud. Intenta de nuevo.';
+    var msg = (err && err.message) || '';
+    if (/invalid login credentials/i.test(msg)) return 'Correo o contraseña incorrectos.';
+    if (/user already registered/i.test(msg)) return 'Ya existe una cuenta con ese correo. Usa "Inicia sesión".';
+    if (/password should be at least/i.test(msg)) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (/unable to validate email/i.test(msg) || /invalid email/i.test(msg)) return 'Correo inválido.';
+    if (/email not confirmed/i.test(msg)) return 'Confirma tu correo primero: revisa tu bandeja de entrada y haz clic en el enlace que te enviamos.';
+    if (/rate limit/i.test(msg)) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+    return msg || 'No se pudo completar la solicitud. Intenta de nuevo.';
   }
 
   authForm.addEventListener('submit', function(ev){
@@ -1094,19 +1167,25 @@ textarea{
         return;
       }
       authSubmit.disabled = true;
-      firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(err){
-        showAuthMsg(authErrorMessage(err), 'error');
+      sb.auth.signUp({ email: email, password: password }).then(function(res){
+        if (res.error){ showAuthMsg(authErrorMessage(res.error), 'error'); return; }
+        if (res.data && res.data.session){
+          // Signed in immediately (only happens if email confirmation is off).
+        } else {
+          showAuthMsg('Cuenta creada. Revisa tu correo (' + email + ') y confirma tu cuenta, luego inicia sesión.', 'ok');
+          setAuthMode('login');
+        }
       }).finally(function(){ authSubmit.disabled = false; });
     } else {
       authSubmit.disabled = true;
-      firebase.auth().signInWithEmailAndPassword(email, password).catch(function(err){
-        showAuthMsg(authErrorMessage(err), 'error');
+      sb.auth.signInWithPassword({ email: email, password: password }).then(function(res){
+        if (res.error){ showAuthMsg(authErrorMessage(res.error), 'error'); }
       }).finally(function(){ authSubmit.disabled = false; });
     }
   });
 
   document.getElementById('btnLogout').addEventListener('click', function(){
-    firebase.auth().signOut();
+    sb.auth.signOut();
   });
 
   function applyAuditorUI(){
@@ -1123,7 +1202,86 @@ textarea{
   }
 
   // ---------------------------------------------------------------
-  // Boot: init Firebase, render skeleton, then react to auth state
+  // Áreas view: real "areas" table from Supabase. "Checklist" opens
+  // this app's matrix; every other área is shown for context only
+  // (it lives in Kielsa CI, not here).
+  // ---------------------------------------------------------------
+  var areasView = document.getElementById('areasView');
+  var checklistView = document.getElementById('checklistView');
+
+  function renderAreasGrid(){
+    var grid = document.getElementById('areasGrid');
+    if (!AREAS.length){
+      grid.innerHTML = '<p class="subtitle">No se pudieron cargar las áreas.</p>';
+      return;
+    }
+    var html = '';
+    AREAS.forEach(function(a){
+      var isChecklist = (a.nombre || '').trim().toLowerCase() === 'checklist';
+      html += '<button type="button" class="area-card' + (isChecklist ? ' active' : ' disabled') + '" data-area-id="' + a.id + '"' + (isChecklist ? '' : ' disabled') + '>' +
+        '<div class="area-code">' + (a.codigo || '') + '</div>' +
+        '<div class="area-name">' + a.nombre + '</div>' +
+        '<div class="area-hint">' + (isChecklist ? 'Entrar →' : 'Disponible en Kielsa CI') + '</div>' +
+        '</button>';
+    });
+    grid.innerHTML = html;
+    grid.querySelectorAll('.area-card.active').forEach(function(btn){
+      btn.addEventListener('click', showChecklistView);
+    });
+  }
+
+  function showAreasView(){
+    checklistView.hidden = true;
+    areasView.hidden = false;
+  }
+  function showChecklistView(){
+    areasView.hidden = true;
+    checklistView.hidden = false;
+  }
+  document.getElementById('btnBackAreas').addEventListener('click', showAreasView);
+
+  // ---------------------------------------------------------------
+  // Directory: load real países / auditores / áreas from Supabase.
+  // These tables are public-read, so this works before login too.
+  // ---------------------------------------------------------------
+  function loadDirectory(){
+    return Promise.all([
+      db.from('paises').select('id,nombre,codigo'),
+      db.from('auditores').select('nombre,email,pais_ids,estado'),
+      db.from('areas').select('id,codigo,nombre').order('id')
+    ]).then(function(results){
+      var paisesRes = results[0], auditoresRes = results[1], areasRes = results[2];
+
+      var PAIS_ID_TO_CODE = {};
+      (paisesRes.data || []).forEach(function(p){
+        if (p.codigo) PAIS_ID_TO_CODE[p.id] = p.codigo.toLowerCase();
+      });
+
+      var newAuditors = {};
+      (auditoresRes.data || []).forEach(function(a){
+        if (!a.email) return;
+        var countries = (a.pais_ids || [])
+          .map(function(pid){ return PAIS_ID_TO_CODE[pid]; })
+          .filter(function(cid){ return cid && ALL_COUNTRY_IDS.indexOf(cid) !== -1; });
+        newAuditors[a.email.toLowerCase()] = { name: a.nombre || a.email, countries: countries };
+      });
+      AUDITORS = newAuditors;
+
+      AREAS = areasRes.data || [];
+      renderAreasGrid();
+
+      // Refresh session UI/permissions in case directory arrived after login.
+      if (currentEmail){
+        currentAuditor = AUDITORS[currentEmail] || null;
+        applyAuditorUI();
+        renderCells(docState.statuses);
+      }
+    }).catch(function(e){ console.error('loadDirectory failed', e); });
+  }
+
+  // ---------------------------------------------------------------
+  // Boot: init Supabase, render skeleton, load directory, then react
+  // to auth state.
   // ---------------------------------------------------------------
   renderMatrixSkeleton();
   ensureMonthOption('2026-09', true);
@@ -1131,35 +1289,34 @@ textarea{
   if (thisMonth !== '2026-09') ensureMonthOption(thisMonth, false);
   renderAll();
 
+  var sb = null;
   try{
-    firebase.initializeApp(firebaseConfig);
-    var auth = firebase.auth();
-    db = firebase.firestore();
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    db = sb;
 
-    auth.onAuthStateChanged(function(user){
-      if (user && !user.isAnonymous && user.email){
+    loadDirectory();
+
+    sb.auth.onAuthStateChange(function(event, session){
+      var user = session && session.user;
+      if (user && user.email){
         currentEmail = user.email.toLowerCase();
         currentAuditor = AUDITORS[currentEmail] || null;
         applyAuditorUI();
 
         authOverlay.hidden = true;
         appWrap.hidden = false;
+        showAreasView();
 
         ready = true;
         syncText.textContent = 'Sincronizado';
         syncIndicator.classList.remove('offline','error');
-        db.collection('cierreRegional').get().then(function(qs){
-          qs.forEach(function(d){ ensureMonthOption(d.id, false); });
-          subscribeMonth(monthSelect.value || '2026-09');
-        }).catch(function(){
-          subscribeMonth(monthSelect.value || '2026-09');
-        });
+        subscribeMonth(monthSelect.value || '2026-09');
       } else {
-        // Signed out (or an old anonymous session) -> show login screen
+        // Signed out -> show login screen
         ready = false;
         currentAuditor = null;
         currentEmail = null;
-        if (unsub){ unsub(); unsub = null; }
+        if (unsub){ unsub.unsubscribe(); unsub = null; }
         authOverlay.hidden = false;
         appWrap.hidden = true;
         authPassword.value = '';
@@ -1167,7 +1324,7 @@ textarea{
       }
     });
   } catch(e){
-    console.error('firebase init failed', e);
+    console.error('supabase init failed', e);
     showAuthMsg('No se pudo conectar con el servidor. Revisa tu conexión a internet.', 'error');
   }
 
