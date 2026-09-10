@@ -235,22 +235,21 @@ table.datatable tbody tr:hover td{ background:var(--grayBg); }
 .bar .b-proceso{ background:var(--warning); }
 .bar .b-norev{ background:var(--gray); }
 
-/* ---------- matrix ---------- */
-.matrix-scroll{ overflow-x:auto; }
-table.matrix{ border-collapse:separate; border-spacing:0; width:100%; min-width:1180px; }
-table.matrix th, table.matrix td{ padding:0; border-bottom:1px solid var(--border); }
-.country-row th{
-  background:var(--grayBg); color:var(--text2); font-size:10px; font-weight:700;
-  text-transform:uppercase; letter-spacing:.06em; padding:9px 8px; text-align:center;
-  border-bottom:1px solid var(--border2); border-left:2px solid var(--bg);
+/* ---------- matrix (one panel per country) ---------- */
+.country-panel .panel-head .left{ gap:8px; }
+.country-panel .panel-head .left i{ color:var(--primary); }
+.country-panel .panel-head .count{
+  font-size:11px; font-weight:600; color:var(--text3); margin-left:2px;
 }
-.country-row th:first-child{ border-left:none; }
+.matrix-scroll{ overflow-x:auto; }
+table.matrix{ border-collapse:separate; border-spacing:0; width:100%; min-width:520px; }
+table.matrix th, table.matrix td{ padding:0; border-bottom:1px solid var(--border); }
 .company-row th{
   background:var(--grayBg); color:var(--text3); font-weight:500; font-size:11px;
-  padding:8px 6px 10px; text-align:center; border-left:1px solid var(--border); min-width:84px;
+  padding:8px 6px 10px; text-align:center; border-left:1px solid var(--border); min-width:100px;
 }
 .company-row th:first-child{ border-left:none; }
-th.corner{ position:sticky; left:0; z-index:3; background:var(--grayBg); min-width:240px; text-align:left !important; }
+th.corner{ position:sticky; left:0; z-index:3; background:var(--grayBg); min-width:220px; text-align:left !important; }
 .group-row th{
   background:var(--primaryLight); text-align:left; padding:7px 14px; font-size:10px; font-weight:700;
   letter-spacing:.06em; text-transform:uppercase; color:var(--primary);
@@ -406,14 +405,7 @@ select#monthSelect{
       </div>
 
       <div id="checklistView">
-        <section class="panel">
-          <div class="panel-head">
-            <div class="left"><i class="ti ti-checklist"></i><span>Matriz de cierre</span></div>
-          </div>
-          <div class="matrix-scroll">
-            <table class="matrix" id="matrixTable" aria-label="Matriz de actividades de cierre por empresa"></table>
-          </div>
-        </section>
+        <div id="matrixContainer"></div>
 
         <section class="footer-grid">
           <div class="note-card">
@@ -705,48 +697,54 @@ select#monthSelect{
       '</div>';
   }
 
+  // One independent panel + table per country, instead of a single wide
+  // table with every country's companies crammed side by side.
   function renderMatrixSkeleton(){
-    var table = document.getElementById('matrixTable');
-    var html = '<thead>';
-    html += '<tr class="country-row"><th class="corner" rowspan="2">Actividad de cierre</th>';
+    var container = document.getElementById('matrixContainer');
+    var html = '';
+
     COUNTRIES.forEach(function(c){
-      html += '<th colspan="' + c.companies.length + '">' + c.name + '</th>';
-    });
-    html += '</tr>';
-    html += '<tr class="company-row">';
-    COUNTRIES.forEach(function(c){
+      html += '<section class="panel country-panel" data-country="' + c.id + '">' +
+        '<div class="panel-head">' +
+          '<div class="left"><i class="ti ti-map-pin"></i><span>' + c.name + '</span>' +
+          '<span class="count">&middot; ' + c.companies.length + ' ' + (c.companies.length===1?'empresa':'empresas') + '</span></div>' +
+        '</div>' +
+        '<div class="matrix-scroll"><table class="matrix" aria-label="Matriz de cierre · ' + c.name + '">';
+
+      html += '<thead><tr class="company-row"><th class="corner">Actividad de cierre</th>';
       c.companies.forEach(function(co){ html += '<th>' + co.name + '</th>'; });
-    });
-    html += '</tr></thead><tbody>';
+      html += '</tr></thead><tbody>';
 
-    GROUPS.forEach(function(g){
-      html += '<tr class="group-row"><th colspan="' + (COMPANIES.length+1) + '">' + g.name + '</th></tr>';
-      g.activities.forEach(function(a){
-        html += '<tr class="activity-row" data-activity="' + a.id + '">';
-        html += '<td class="actname">' + a.name + '</td>';
-        COMPANIES.forEach(function(co){
-          html += '<td class="cell-wrap" data-company="' + co.id + '">' +
-            '<select class="cell" data-key="' + key(a.id, co.id) + '" aria-label="' + a.name + ' · ' + co.name + '">' +
-              '<option value="no_revisado">No revisado</option>' +
-              '<option value="si">Sí</option>' +
-              '<option value="no">No</option>' +
-              '<option value="en_proceso">En proceso</option>' +
-            '</select></td>';
+      GROUPS.forEach(function(g){
+        html += '<tr class="group-row"><th colspan="' + (c.companies.length+1) + '">' + g.name + '</th></tr>';
+        g.activities.forEach(function(a){
+          html += '<tr class="activity-row" data-activity="' + a.id + '">';
+          html += '<td class="actname">' + a.name + '</td>';
+          c.companies.forEach(function(co){
+            html += '<td class="cell-wrap" data-company="' + co.id + '">' +
+              '<select class="cell" data-key="' + key(a.id, co.id) + '" aria-label="' + a.name + ' · ' + co.name + '">' +
+                '<option value="no_revisado">No revisado</option>' +
+                '<option value="si">Sí</option>' +
+                '<option value="no">No</option>' +
+                '<option value="en_proceso">En proceso</option>' +
+              '</select></td>';
+          });
+          html += '</tr>';
         });
-        html += '</tr>';
       });
+      html += '</tbody></table></div></section>';
     });
-    html += '</tbody>';
-    table.innerHTML = html;
 
-    table.querySelectorAll('select.cell').forEach(function(sel){
+    container.innerHTML = html;
+
+    container.querySelectorAll('select.cell').forEach(function(sel){
       sel.addEventListener('change', function(){ setCell(sel.getAttribute('data-key'), sel.value); });
     });
   }
 
   function renderCells(statuses){
-    var table = document.getElementById('matrixTable');
-    table.querySelectorAll('select.cell').forEach(function(sel){
+    var container = document.getElementById('matrixContainer');
+    container.querySelectorAll('select.cell').forEach(function(sel){
       var k = sel.getAttribute('data-key');
       var companyId = sel.closest('td') ? sel.closest('td').getAttribute('data-company') : null;
       var v = statuses[k] || 'no_revisado';
