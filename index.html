@@ -4,678 +4,477 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cierre Contable Regional</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230E6E63'/%3E%3Crect x='28' y='18' width='44' height='64' rx='6' fill='white'/%3E%3Crect x='36' y='30' width='28' height='6' rx='3' fill='%230E6E63'/%3E%3Crect x='36' y='44' width='28' height='6' rx='3' fill='%23DEE4E9'/%3E%3Crect x='36' y='58' width='18' height='6' rx='3' fill='%23DEE4E9'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/jpeg;base64,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">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
-
-:root{
-  --bg:#F3F5F7;
-  --bg-alt:#EAEEF1;
-  --surface:#FFFFFF;
-  --surface-2:#F7F9FA;
-  --ink:#182430;
-  --ink-2:#425064;
-  --muted:#6B7889;
-  --line:#DEE4E9;
-  --line-strong:#C6CFD6;
-  --accent:#0E6E63;
-  --accent-ink:#FFFFFF;
-  --accent-soft:#DFF0EC;
-  --ok:#1F8A55;
-  --ok-soft:#E3F3E9;
-  --bad:#C1432B;
-  --bad-soft:#FBE7E2;
-  --na:#8B96A3;
-  --na-soft:#EDEFF1;
-  --pending:#A8710E;
-  --pending-soft:#FBEEDA;
-  --shadow: 0 1px 2px rgba(20,30,40,.07), 0 10px 28px -14px rgba(20,30,40,.18);
-  --focus: 0 0 0 3px rgba(14,110,99,.35);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0E1419;
-    --bg-alt:#121920;
-    --surface:#171F27;
-    --surface-2:#1C2530;
-    --ink:#E8EDF1;
-    --ink-2:#C2CBD4;
-    --muted:#8B98A6;
-    --line:#28323D;
-    --line-strong:#37424F;
-    --accent:#32C4B0;
-    --accent-ink:#08211D;
-    --accent-soft:#153732;
-    --ok:#3FBE79;
-    --ok-soft:#123A25;
-    --bad:#E5695A;
-    --bad-soft:#3A1C18;
-    --na:#7C8896;
-    --na-soft:#222B33;
-    --pending:#E3AA48;
-    --pending-soft:#3A2C12;
-    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -16px rgba(0,0,0,.6);
-    --focus: 0 0 0 3px rgba(50,196,176,.4);
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0E1419;
-  --bg-alt:#121920;
-  --surface:#171F27;
-  --surface-2:#1C2530;
-  --ink:#E8EDF1;
-  --ink-2:#C2CBD4;
-  --muted:#8B98A6;
-  --line:#28323D;
-  --line-strong:#37424F;
-  --accent:#32C4B0;
-  --accent-ink:#08211D;
-  --accent-soft:#153732;
-  --ok:#3FBE79;
-  --ok-soft:#123A25;
-  --bad:#E5695A;
-  --bad-soft:#3A1C18;
-  --na:#7C8896;
-  --na-soft:#222B33;
-  --pending:#E3AA48;
-  --pending-soft:#3A2C12;
-  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -16px rgba(0,0,0,.6);
-  --focus: 0 0 0 3px rgba(50,196,176,.4);
-}
-
-*{box-sizing:border-box;}
-html,body{ background:var(--bg); }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#f1f5f9;}
 body{
-  margin:0;
-  background:var(--bg);
-  color:var(--ink);
-  font-family:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+  color:#0f172a;
   -webkit-font-smoothing:antialiased;
 }
-.num{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric:tabular-nums;}
+.num{font-variant-numeric:tabular-nums;}
+[hidden]{display:none !important;}
 
-.wrap{
-  max-width:1400px;
-  margin:0 auto;
-  padding:28px 24px 64px;
-}
-
-/* ---------- header ---------- */
-header{
-  display:flex;
-  flex-wrap:wrap;
-  gap:20px;
-  align-items:flex-end;
-  justify-content:space-between;
-  margin-bottom:22px;
-}
-.eyebrow{
-  font-size:11.5px;
-  font-weight:600;
-  letter-spacing:.11em;
-  text-transform:uppercase;
-  color:var(--accent);
-  margin:0 0 6px;
-}
-h1{
-  font-size:26px;
-  font-weight:700;
-  margin:0;
-  letter-spacing:-.01em;
-  text-wrap:balance;
-}
-.subtitle{
-  margin:6px 0 0;
-  color:var(--muted);
-  font-size:13.5px;
-  max-width:56ch;
+:root{
+  --primary:#1e4db7;
+  --primaryLight:#eef2ff;
+  --success:#0d7a4e;
+  --successBg:#e8f8f2;
+  --warning:#b45309;
+  --warningBg:#fffbeb;
+  --danger:#c0392b;
+  --dangerBg:#fef2f2;
+  --purple:#6d28d9;
+  --purpleBg:#f5f3ff;
+  --gray:#64748b;
+  --grayBg:#f8fafc;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --bg:#f1f5f9;
+  --surface:#ffffff;
 }
 
-.controls{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.field-label{
-  font-size:11px;
-  font-weight:600;
-  color:var(--muted);
-  text-transform:uppercase;
-  letter-spacing:.07em;
-  margin-right:2px;
-}
-select, input[type="month"]{
-  font-family:inherit;
-  font-size:13.5px;
-  color:var(--ink);
-  background:var(--surface);
-  border:1px solid var(--line-strong);
-  border-radius:8px;
-  padding:8px 10px;
-  box-shadow:var(--shadow);
-}
-select:focus, input:focus, button:focus-visible, .cell:focus-visible{
-  outline:none;
-  box-shadow:var(--focus);
-}
-button{
-  font-family:inherit;
-  font-size:13px;
-  font-weight:600;
-  cursor:pointer;
-  border-radius:8px;
-  border:1px solid var(--line-strong);
-  background:var(--surface);
-  color:var(--ink-2);
-  padding:8px 12px;
-  transition:background .12s ease, border-color .12s ease, transform .08s ease;
-}
-button:hover{ border-color:var(--accent); color:var(--accent); }
-button:active{ transform:translateY(1px); }
-button.primary{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:var(--accent-ink);
-}
-button.primary:hover{ filter:brightness(1.06); color:var(--accent-ink); }
-button.ghost{ background:transparent; border-color:transparent; color:var(--muted); padding:8px 8px;}
-button.ghost:hover{ color:var(--accent); }
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-.sync{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:11.5px;
-  color:var(--muted);
-}
-.sync .dot{ width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px var(--ok-soft); }
-.sync.offline .dot{ background:var(--na); box-shadow:0 0 0 3px var(--na-soft); }
-.sync.error .dot{ background:var(--bad); box-shadow:0 0 0 3px var(--bad-soft); }
-
-.newmonth-panel{
-  display:none;
-  align-items:center;
-  gap:8px;
-  background:var(--surface);
-  border:1px solid var(--line-strong);
-  border-radius:10px;
-  padding:8px;
-  box-shadow:var(--shadow);
-}
-.newmonth-panel.open{ display:flex; }
-
-/* ---------- summary ---------- */
-.summary{
-  display:grid;
-  grid-template-columns: 1.15fr repeat(5, 1fr);
-  gap:12px;
-  margin-bottom:26px;
-}
-@media (max-width:1050px){
-  .summary{ grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width:620px){
-  .summary{ grid-template-columns: 1fr; }
-}
-.tile{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:16px 18px;
-  box-shadow:var(--shadow);
-  min-width:0;
-}
-.tile.global{
-  background:linear-gradient(155deg, var(--accent-soft), var(--surface) 65%);
-  border-color:var(--accent);
-}
-.tile-label{
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.07em;
-  color:var(--muted);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-}
-.tile-pct{
-  font-size:30px;
-  font-weight:700;
-  line-height:1;
-}
-.tile.global .tile-pct{ font-size:38px; }
-.tile-count{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:4px;
-}
-.bar{
-  margin-top:10px;
-  height:7px;
-  border-radius:4px;
-  background:var(--na-soft);
-  overflow:hidden;
-  display:flex;
-}
-.bar span{ height:100%; display:block; }
-.bar .b-si{ background:var(--ok); }
-.bar .b-no{ background:var(--bad); }
-.bar .b-pend{ background:var(--pending); }
-
-/* ---------- matrix ---------- */
-.matrix-card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:14px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  margin-bottom:20px;
-}
-.matrix-scroll{
-  overflow-x:auto;
-}
-table.matrix{
-  border-collapse:separate;
-  border-spacing:0;
-  width:100%;
-  min-width:1180px;
-}
-table.matrix th, table.matrix td{
-  padding:0;
-  border-bottom:1px solid var(--line);
-}
-.country-row th{
-  background:var(--surface-2);
-  color:var(--ink-2);
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  padding:9px 8px;
-  text-align:center;
-  border-bottom:1px solid var(--line-strong);
-  border-left:2px solid var(--bg);
-}
-.country-row th:first-child{ border-left:none; }
-.company-row th{
-  background:var(--surface-2);
-  color:var(--muted);
-  font-weight:500;
-  font-size:11.5px;
-  padding:8px 6px 10px;
-  text-align:center;
-  border-left:1px solid var(--line);
-  min-width:84px;
-}
-.company-row th:first-child{ border-left:none; }
-th.corner{
-  position:sticky; left:0; z-index:3;
-  background:var(--surface-2);
-  min-width:250px;
-  text-align:left !important;
-}
-.group-row th{
-  background:var(--bg-alt);
-  text-align:left;
-  padding:7px 14px;
-  font-size:11px;
-  font-weight:600;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  color:var(--accent);
-  border-top:1px solid var(--line-strong);
-  border-bottom:1px solid var(--line-strong);
-}
-tr.activity-row td.actname, tr.activity-row th.actname{
-  position:sticky; left:0; z-index:2;
-  background:var(--surface);
-  text-align:left;
-  padding:9px 14px;
-  font-size:13px;
-  color:var(--ink);
-  font-weight:500;
-  min-width:250px;
-  border-right:1px solid var(--line-strong);
-  box-shadow: 2px 0 4px -2px rgba(20,30,40,.08);
-}
-tr.activity-row:nth-child(even) td.actname{ background:var(--surface-2); }
-tr.activity-row:nth-child(even) td.cell-wrap{ background:var(--surface-2); }
-
-.cell-wrap{ padding:5px; text-align:center; border-left:1px solid var(--line); }
-tr.activity-row td.cell-wrap:first-of-type{ border-left:none; }
-
-.cell{
-  width:100%;
-  border:1px solid transparent;
-  border-radius:8px;
-  padding:7px 4px;
-  font-size:11.5px;
-  font-weight:600;
-  letter-spacing:.02em;
-  cursor:pointer;
-  transition:filter .1s ease, transform .06s ease;
-  text-transform:uppercase;
-  font-family:inherit;
-}
-.cell:hover{ filter:brightness(0.96); }
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .cell:hover{ filter:brightness(1.15); } }
-:root[data-theme="dark"] .cell:hover{ filter:brightness(1.15); }
-.cell:active{ transform:scale(.96); }
-.cell:disabled{ cursor:wait; opacity:.6; }
-.cell.si{ background:var(--ok-soft); color:var(--ok); border-color:color-mix(in srgb, var(--ok) 35%, transparent); }
-.cell.no{ background:var(--bad-soft); color:var(--bad); border-color:color-mix(in srgb, var(--bad) 35%, transparent); }
-.cell.na{ background:var(--na-soft); color:var(--na); border-color:color-mix(in srgb, var(--na) 30%, transparent); }
-.cell.pendiente{ background:var(--pending-soft); color:var(--pending); border-color:color-mix(in srgb, var(--pending) 35%, transparent); }
-
-/* ---------- footer ---------- */
-.footer-grid{
-  display:grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap:16px;
-  align-items:start;
-}
-@media (max-width:820px){ .footer-grid{ grid-template-columns:1fr; } }
-.legend{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px 16px;
-  align-items:center;
-}
-.legend-item{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2); }
-.legend-swatch{ width:11px; height:11px; border-radius:3px; }
-.legend-swatch.si{ background:var(--ok); }
-.legend-swatch.no{ background:var(--bad); }
-.legend-swatch.na{ background:var(--na); }
-.legend-swatch.pendiente{ background:var(--pending); }
-
-.note-card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:14px 16px;
-  font-size:12.5px;
-  color:var(--muted);
-  box-shadow:var(--shadow);
-}
-.note-card b{ color:var(--ink-2); }
-
-.obs-card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:14px 16px;
-  box-shadow:var(--shadow);
-}
-.obs-card label{
-  display:block;
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  color:var(--muted);
-  margin-bottom:8px;
-}
-textarea{
-  width:100%;
-  min-height:64px;
-  resize:vertical;
-  font-family:inherit;
-  font-size:13px;
-  color:var(--ink);
-  background:var(--surface-2);
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:9px 10px;
-}
-.save-hint{ font-size:11px; color:var(--muted); margin-top:6px; height:14px; }
-
-.meta-row{
-  display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
-  margin-top:18px; padding-top:14px; border-top:1px solid var(--line);
-  font-size:11.5px; color:var(--muted);
-}
-.meta-row a{ color:var(--accent); }
-
-/* ---------- area badge ---------- */
-.area-badge{
-  display:inline-flex; align-items:center; gap:6px;
-  background:var(--accent-soft); color:var(--accent);
-  border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  border-radius:999px; padding:3px 10px 3px 8px;
-  font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
-  margin-left:8px; vertical-align:middle;
-}
-
-/* ---------- session bar ---------- */
-.session-bar{
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  font-size:12px; color:var(--muted);
-}
-.session-bar b{ color:var(--ink-2); }
-.scope-pill{
-  font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
-  background:var(--surface-2); border:1px solid var(--line-strong); color:var(--ink-2);
-  border-radius:999px; padding:3px 9px;
-}
-
-/* ---------- topbar ---------- */
-.topbar{
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
-  padding:16px 0 18px;
-  border-bottom:1px solid var(--line);
-  margin-bottom:24px;
-}
-.topbar-brand{ display:flex; align-items:center; gap:9px; }
-.topbar-brand .logo-dot{ width:10px; height:10px; border-radius:3px; background:var(--accent); flex:none; }
-.topbar-brand b{ font-size:14.5px; letter-spacing:-.01em; }
-
-/* ---------- areas view ---------- */
-.areas-head h1{ font-size:23px; margin:0 0 4px; }
-.areas-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(190px,1fr));
-  gap:14px;
-  margin-top:22px;
-  margin-bottom:40px;
-}
-.area-card{
-  text-align:left;
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:18px 16px;
-  box-shadow:var(--shadow);
-  cursor:pointer;
-  font-family:inherit;
-  transition:border-color .12s ease, transform .08s ease;
-}
-.area-card:hover{ border-color:var(--accent); }
-.area-card:active{ transform:translateY(1px); }
-.area-card .area-code{
-  font-size:10.5px; font-weight:600; color:var(--muted);
-  text-transform:uppercase; letter-spacing:.06em;
-}
-.area-card .area-name{ font-size:14.5px; font-weight:600; color:var(--ink); margin-top:6px; }
-.area-card .area-hint{ font-size:11px; color:var(--muted); margin-top:10px; }
-.area-card.active{
-  border-color:var(--accent);
-  background:linear-gradient(155deg, var(--accent-soft), var(--surface) 65%);
-}
-.area-card.active .area-name{ color:var(--accent); }
-.area-card.active .area-hint{ color:var(--accent); font-weight:600; }
-.area-card.disabled{ cursor:not-allowed; opacity:.5; }
-.back-link{
-  display:inline-flex; align-items:center; gap:4px;
-  background:transparent; border:none; color:var(--accent);
-  font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
-  padding:0; margin-bottom:16px;
-}
-.back-link:hover{ text-decoration:underline; }
-
-/* ---------- auth screen ---------- */
+/* ---------- login ---------- */
 .auth-overlay{
   position:fixed; inset:0; z-index:50;
-  background:var(--bg);
   display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#0f1e5c,#1e4db7 50%,#3b82f6);
   padding:24px;
 }
 .auth-card{
-  width:100%; max-width:380px;
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:16px;
-  box-shadow:var(--shadow);
-  padding:28px 26px 24px;
+  width:100%; max-width:400px;
+  background:#fff;
+  border-radius:20px;
+  padding:2.5rem 2.25rem;
+  box-shadow:0 24px 80px rgba(0,0,0,.3);
+  animation:fadeIn .4s ease;
 }
-.auth-card h2{ margin:0 0 4px; font-size:19px; letter-spacing:-.01em; }
-.auth-card .subtitle{ margin:0 0 20px; }
+.auth-logo{ text-align:center; margin-bottom:1.75rem; }
+.auth-logo img{ height:52px; object-fit:contain; margin-bottom:12px; }
+.auth-logo .t{ font-size:20px; font-weight:800; color:var(--text); }
+.auth-logo .s{ font-size:12px; color:var(--text3); margin-top:4px; }
+.auth-msg{
+  background:var(--dangerBg); color:var(--danger);
+  border-radius:9px; padding:.6rem .9rem; font-size:12px;
+  margin-bottom:16px; display:none; align-items:center; gap:7px;
+}
+.auth-msg.show{ display:flex; }
 .auth-field{ margin-bottom:14px; }
 .auth-field label{
-  display:block; font-size:11px; font-weight:600; text-transform:uppercase;
-  letter-spacing:.06em; color:var(--muted); margin-bottom:6px;
+  display:block; font-size:11px; font-weight:700; color:var(--text2);
+  margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;
 }
 .auth-field input{
-  width:100%; font-family:inherit; font-size:14px; color:var(--ink);
-  background:var(--surface-2); border:1px solid var(--line-strong);
-  border-radius:8px; padding:10px 11px;
+  width:100%; font-family:inherit; font-size:14px; color:var(--text);
+  background:#fff; border:1px solid var(--border2);
+  border-radius:8px; padding:.55rem .8rem;
 }
-.auth-field input:focus{ outline:none; box-shadow:var(--focus); }
-.auth-actions{ display:flex; flex-direction:column; gap:8px; margin-top:18px; }
-.auth-actions button{ width:100%; padding:10px 12px; }
-.auth-switch{
-  margin-top:16px; font-size:12.5px; color:var(--muted); text-align:center;
+.auth-field input:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primaryLight); }
+.auth-submit{
+  width:100%; margin-top:6px;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:.65rem .9rem; font-size:14px; font-weight:700;
+  border:none; border-radius:8px; cursor:pointer;
+  background:var(--primary); color:#fff;
+  font-family:inherit;
 }
-.auth-switch a{ color:var(--accent); cursor:pointer; font-weight:600; }
-.auth-msg{
-  font-size:12.5px; border-radius:8px; padding:9px 11px; margin-bottom:14px;
-  display:none;
+.auth-submit:hover{ filter:brightness(1.06); }
+.auth-submit:disabled{ opacity:.6; cursor:wait; }
+.auth-submit i.spin{ animation:sp 1s linear infinite; }
+
+/* ---------- app shell ---------- */
+.shell{ display:flex; min-height:100vh; }
+aside.sidebar{
+  width:220px; flex-shrink:0;
+  background:linear-gradient(180deg,#1e3a8a,#1e4db7 40%,#2563eb);
+  display:flex; flex-direction:column;
 }
-.auth-msg.show{ display:block; }
-.auth-msg.error{ background:var(--bad-soft); color:var(--bad); }
-.auth-msg.ok{ background:var(--ok-soft); color:var(--ok); }
-.auth-forgot{ text-align:right; margin:-6px 0 14px; }
-.auth-forgot a{ font-size:11.5px; color:var(--accent); cursor:pointer; }
-[hidden]{ display:none !important; }
+.sb-head{
+  padding:.9rem 1rem; border-bottom:1px solid rgba(255,255,255,.1);
+  display:flex; align-items:center; gap:10px;
+}
+.sb-logo{
+  width:44px; height:36px; border-radius:8px; background:#fff;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:3px;
+}
+.sb-logo img{ width:100%; height:100%; object-fit:contain; border-radius:6px; }
+.sb-brand b{ display:block; font-size:11px; font-weight:700; color:#fff; line-height:1.3; }
+.sb-brand span{ display:block; font-size:9px; color:rgba(255,255,255,.6); margin-top:2px; }
+.sb-nav{ flex:1; padding:.5rem 0; }
+.sb-group-label{
+  font-size:9px; font-weight:700; color:rgba(255,255,255,.4);
+  padding:.8rem 1rem .3rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.sb-item{
+  display:flex; align-items:center; gap:9px; padding:.5rem 1rem;
+  font-size:12px; color:rgba(255,255,255,.65); cursor:pointer;
+  margin:1px 8px; border-radius:8px; font-weight:400;
+}
+.sb-item:hover{ background:rgba(255,255,255,.08); }
+.sb-item.active{ background:rgba(255,255,255,.15); color:#fff; font-weight:600; }
+.sb-item i{ font-size:15px; width:17px; text-align:center; color:rgba(255,255,255,.6); }
+.sb-item.active i{ color:#fff; }
+.sb-foot{ border-top:1px solid rgba(255,255,255,.06); }
+.sb-user{
+  padding:.7rem 1rem; display:flex; align-items:center; gap:8px;
+}
+.sb-user .nm{ flex:1; min-width:0; }
+.sb-user .nm div:first-child{
+  font-size:11px; font-weight:600; color:#fff; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+.sb-user .nm div:last-child{ font-size:9px; color:rgba(255,255,255,.5); }
+.sb-user i.ti-logout{ font-size:15px; color:rgba(255,255,255,.5); cursor:pointer; }
+.sb-credit{ padding:.5rem 1rem; text-align:center; }
+.sb-credit div{ font-size:9px; color:rgba(255,255,255,.3); line-height:1.6; }
+.sb-credit b{ color:rgba(255,255,255,.45); font-weight:600; }
+
+.main-col{ flex:1; display:flex; flex-direction:column; min-width:0; }
+.topbar{
+  background:#fff; border-bottom:1px solid var(--border);
+  padding:.7rem 1.5rem; display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 1px 3px rgba(0,0,0,.05); flex-shrink:0; flex-wrap:wrap; gap:8px;
+}
+.topbar-title{ display:flex; align-items:center; gap:10px; }
+.topbar-title .bar{ width:4px; height:20px; border-radius:2px; }
+.topbar-title strong{ font-size:15px; color:var(--text); }
+.sync{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text3); }
+.sync .dot{ width:7px; height:7px; border-radius:50%; background:var(--success); }
+.sync.offline .dot{ background:var(--gray); }
+.sync.error .dot{ background:var(--danger); }
+
+main.content{ flex:1; overflow-y:auto; padding:1.4rem; }
+
+/* ---------- panel / card system ---------- */
+.panel{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; margin-bottom:16px; overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.panel-head{
+  padding:.85rem 1.1rem; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+  background:linear-gradient(to right,#fafbff,#fff);
+}
+.panel-head .left{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:13px; color:var(--text); }
+.panel-head .left i{ color:var(--warning); }
+.panel-head .right{ display:flex; gap:8px; align-items:center; }
+
+.btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:.42rem .9rem; font-size:13px; font-weight:600;
+  border:1px solid var(--border2); border-radius:8px;
+  background:var(--surface); color:var(--text2); cursor:pointer; font-family:inherit;
+  white-space:nowrap;
+}
+.btn:hover{ border-color:var(--primary); color:var(--primary); }
+.btn.primary{ background:var(--primary); border-color:var(--primary); color:#fff; }
+.btn.primary:hover{ filter:brightness(1.06); color:#fff; }
+.btn.sm{ padding:.25rem .6rem; font-size:11px; }
+.btn:disabled{ opacity:.5; cursor:not-allowed; }
+.btn:disabled:hover{ border-color:var(--border2); color:var(--text2); }
+
+table.datatable{ width:100%; border-collapse:collapse; }
+table.datatable th{
+  text-align:left; padding:.5rem .85rem; font-size:10px; font-weight:700;
+  color:var(--text3); background:var(--grayBg); border-bottom:1px solid var(--border);
+  white-space:nowrap; text-transform:uppercase; letter-spacing:.06em;
+}
+table.datatable td{
+  padding:.65rem .85rem; border-bottom:1px solid var(--border);
+  color:var(--text); vertical-align:middle; font-size:13px;
+}
+table.datatable tbody tr:last-child td{ border-bottom:none; }
+table.datatable tbody tr:hover td{ background:var(--grayBg); }
+
+.pill{
+  display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px;
+  font-size:11px; font-weight:700; white-space:nowrap;
+}
+.pill.ok{ background:var(--successBg); color:var(--success); }
+.pill.muted{ background:var(--grayBg); color:var(--gray); }
+
+/* ---------- areas table extras ---------- */
+.area-code{ font-size:10px; font-weight:700; color:var(--text3); }
+.area-name{ font-weight:700; }
+.area-muted-note{ font-size:12px; color:var(--text3); }
+
+/* ---------- summary tiles ---------- */
+.summary{
+  display:grid; grid-template-columns:1.15fr repeat(5,1fr); gap:12px; margin-bottom:16px;
+}
+@media (max-width:1050px){ .summary{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:620px){ .summary{ grid-template-columns:1fr; } }
+.tile{
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:16px 18px; box-shadow:0 1px 3px rgba(0,0,0,.06); min-width:0;
+}
+.tile.global{
+  background:linear-gradient(155deg,var(--primaryLight),var(--surface) 65%);
+  border-color:var(--primary);
+}
+.tile-label{
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--text3); margin-bottom:8px;
+}
+.tile-pct{ font-size:28px; font-weight:800; line-height:1; }
+.tile.global .tile-pct{ font-size:36px; }
+.tile-count{ font-size:12px; color:var(--text3); margin-top:4px; }
+.bar{ margin-top:10px; height:7px; border-radius:4px; background:var(--grayBg); overflow:hidden; display:flex; }
+.bar span{ height:100%; display:block; }
+.bar .b-si{ background:var(--success); }
+.bar .b-no{ background:var(--danger); }
+.bar .b-pend{ background:var(--warning); }
+
+/* ---------- matrix ---------- */
+.matrix-scroll{ overflow-x:auto; }
+table.matrix{ border-collapse:separate; border-spacing:0; width:100%; min-width:1180px; }
+table.matrix th, table.matrix td{ padding:0; border-bottom:1px solid var(--border); }
+.country-row th{
+  background:var(--grayBg); color:var(--text2); font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em; padding:9px 8px; text-align:center;
+  border-bottom:1px solid var(--border2); border-left:2px solid var(--bg);
+}
+.country-row th:first-child{ border-left:none; }
+.company-row th{
+  background:var(--grayBg); color:var(--text3); font-weight:500; font-size:11px;
+  padding:8px 6px 10px; text-align:center; border-left:1px solid var(--border); min-width:84px;
+}
+.company-row th:first-child{ border-left:none; }
+th.corner{ position:sticky; left:0; z-index:3; background:var(--grayBg); min-width:240px; text-align:left !important; }
+.group-row th{
+  background:var(--primaryLight); text-align:left; padding:7px 14px; font-size:10px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--primary);
+  border-top:1px solid var(--border2); border-bottom:1px solid var(--border2);
+}
+tr.activity-row td.actname{
+  position:sticky; left:0; z-index:2; background:var(--surface); text-align:left;
+  padding:9px 14px; font-size:13px; color:var(--text); font-weight:500; min-width:240px;
+  border-right:1px solid var(--border2); box-shadow:2px 0 4px -2px rgba(20,30,40,.08);
+}
+tr.activity-row:nth-child(even) td.actname{ background:var(--grayBg); }
+tr.activity-row:nth-child(even) td.cell-wrap{ background:var(--grayBg); }
+.cell-wrap{ padding:5px; text-align:center; border-left:1px solid var(--border); }
+tr.activity-row td.cell-wrap:first-of-type{ border-left:none; }
+.cell{
+  width:100%; border:1px solid transparent; border-radius:8px; padding:7px 4px;
+  font-size:11px; font-weight:700; letter-spacing:.02em; cursor:pointer;
+  text-transform:uppercase; font-family:inherit;
+}
+.cell:hover{ filter:brightness(.97); }
+.cell:disabled{ cursor:not-allowed; opacity:.6; }
+.cell.si{ background:var(--successBg); color:var(--success); border-color:#0d7a4e55; }
+.cell.no{ background:var(--dangerBg); color:var(--danger); border-color:#c0392b55; }
+.cell.na{ background:var(--grayBg); color:var(--gray); border-color:#64748b40; }
+.cell.pendiente{ background:var(--warningBg); color:var(--warning); border-color:#b4530955; }
+
+.legend{ display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
+.legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
+.legend-swatch{ width:11px; height:11px; border-radius:3px; }
+.legend-swatch.si{ background:var(--success); }
+.legend-swatch.no{ background:var(--danger); }
+.legend-swatch.na{ background:var(--gray); }
+.legend-swatch.pendiente{ background:var(--warning); }
+
+.footer-grid{ display:grid; grid-template-columns:1fr 1.3fr; gap:16px; align-items:start; }
+@media (max-width:820px){ .footer-grid{ grid-template-columns:1fr; } }
+.note-card, .obs-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.note-card{ font-size:12px; color:var(--text3); }
+.note-card b{ color:var(--text2); }
+.obs-card label{
+  display:block; font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--text3); margin-bottom:8px;
+}
+textarea{
+  width:100%; min-height:64px; resize:vertical; font-family:inherit; font-size:13px;
+  color:var(--text); background:var(--grayBg); border:1px solid var(--border); border-radius:8px; padding:9px 10px;
+}
+.save-hint{ font-size:11px; color:var(--text3); margin-top:6px; height:14px; }
+.meta-row{
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:14px;
+  padding-top:12px; border-top:1px solid var(--border); font-size:11px; color:var(--text3);
+}
+.back-link{
+  display:inline-flex; align-items:center; gap:4px; background:transparent; border:none;
+  color:var(--primary); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer;
+  padding:0; margin-bottom:14px;
+}
+.back-link:hover{ text-decoration:underline; }
+.newmonth-panel{
+  display:none; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border2);
+  border-radius:10px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.newmonth-panel.open{ display:flex; }
+.newmonth-panel input[type="month"]{
+  font-family:inherit; font-size:13px; color:var(--text); background:var(--surface);
+  border:1px solid var(--border2); border-radius:8px; padding:.4rem .6rem;
+}
+select#monthSelect{
+  font-family:inherit; font-size:13px; color:var(--text); background:var(--surface);
+  border:1px solid var(--border2); border-radius:8px; padding:.42rem .7rem;
+}
 </style>
 </head>
 <body>
 
-<!-- ---------- login / signup screen ---------- -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-card">
-    <h2 id="authTitle">Iniciar sesi&oacute;n</h2>
-    <p class="subtitle" id="authSubtitle">Checklist de cierre regional &middot; Auditor&iacute;a Kielsa</p>
-    <div class="auth-msg" id="authMsg"></div>
+    <div class="auth-logo">
+      <img src="data:image/jpeg;base64,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" alt="Kielsa">
+      <div class="t">Kielsa Farmac&eacute;utica CI</div>
+      <div class="s">Cierre Contable Regional</div>
+    </div>
+    <div class="auth-msg" id="authMsg"><i class="ti ti-alert-circle"></i><span id="authMsgText"></span></div>
     <form id="authForm">
       <div class="auth-field">
-        <label for="authEmail">Correo</label>
-        <input type="email" id="authEmail" autocomplete="username" placeholder="nombre@kielsa.hn" required />
+        <label for="authUser">Usuario</label>
+        <input type="text" id="authUser" autocomplete="username" placeholder="tu.usuario" required />
       </div>
       <div class="auth-field">
-        <label for="authPassword">Contrase&ntilde;a</label>
-        <input type="password" id="authPassword" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required minlength="6" />
+        <label for="authPass">Contrase&ntilde;a</label>
+        <input type="password" id="authPass" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required />
       </div>
-      <div class="auth-forgot"><a id="authForgot">&iquest;Olvidaste tu contrase&ntilde;a?</a></div>
-      <div class="auth-actions">
-        <button type="submit" class="primary" id="authSubmit">Entrar</button>
-      </div>
+      <button type="submit" class="auth-submit" id="authSubmit"><span id="authSubmitText">Entrar</span></button>
     </form>
-    <div class="auth-switch">
-      <span id="authSwitchToSignup">&iquest;Primera vez? <a id="authGoSignup">Crea tu cuenta</a></span>
-      <span id="authSwitchToLogin" hidden>&iquest;Ya tienes cuenta? <a id="authGoLogin">Inicia sesi&oacute;n</a></span>
-    </div>
   </div>
 </div>
 
-<div class="wrap" id="appWrap" hidden>
-
-  <div class="topbar">
-    <div class="topbar-brand"><span class="logo-dot"></span><b>Auditor&iacute;a Kielsa</b></div>
-    <div class="session-bar">
-      <span>Sesi&oacute;n: <b id="sessionName">&mdash;</b></span>
-      <span class="scope-pill" id="scopePill">&mdash;</span>
-      <button class="ghost" id="btnLogout" type="button" style="padding:4px 8px;">Cerrar sesi&oacute;n</button>
-    </div>
-  </div>
-
-  <div id="areasView">
-    <div class="areas-head">
-      <p class="eyebrow">Auditor&iacute;a Kielsa &middot; Estructura regional</p>
-      <h1>&Aacute;reas</h1>
-      <p class="subtitle">Selecciona un &aacute;rea para continuar. El &aacute;rea <b>Checklist</b> contiene el cierre contable regional.</p>
-    </div>
-    <div class="areas-grid" id="areasGrid" aria-label="Listado de &aacute;reas"></div>
-  </div>
-
-  <div id="checklistView" hidden>
-    <button type="button" class="back-link" id="btnBackAreas">&larr; &Aacute;reas</button>
-
-    <header>
-      <div>
-        <p class="eyebrow">Control regional &middot; Finanzas &middot; Kielsa<span class="area-badge">&Aacute;rea: Checklist</span></p>
-        <h1>Cierre Contable Regional</h1>
-        <p class="subtitle">Seguimiento mensual de las actividades de cierre contable por empresa, a nivel regional.</p>
+<div class="shell" id="appShell" hidden>
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo"><img src="data:image/jpeg;base64,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" alt="Kielsa"></div>
+      <div class="sb-brand">
+        <b>Kielsa Farmac&eacute;utica CI</b>
+        <span>Cierre Regional</span>
       </div>
-      <div class="controls">
-        <span class="sync" id="syncIndicator"><span class="dot"></span><span id="syncText">Conectando&hellip;</span></span>
-        <span class="field-label">Mes evaluado</span>
-        <select id="monthSelect" aria-label="Mes evaluado"></select>
-        <button class="ghost" id="toggleNewMonth" type="button">+ Nuevo mes</button>
-        <div class="newmonth-panel" id="newMonthPanel">
-          <input type="month" id="newMonthInput" />
-          <button type="button" id="btnNewBlank">Vac&iacute;o</button>
-          <button type="button" class="primary" id="btnNewDup">Duplicar mes actual</button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-group-label">&Aacute;reas</div>
+      <div class="sb-item active" id="navAreas"><i class="ti ti-building"></i>&Aacute;reas</div>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="nm">
+          <div id="sbUserName">&mdash;</div>
+          <div id="sbUserRole">&mdash;</div>
+        </div>
+        <i class="ti ti-refresh" id="sbSyncSpin" style="display:none;"></i>
+        <i class="ti ti-logout" id="btnLogout" title="Salir"></i>
+      </div>
+      <div class="sb-credit">
+        <div>Desarrollado con IA &middot; Claude by Anthropic<br><b>&copy; Donny Rojas &middot; Kielsa Farmac&eacute;utica</b></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-col">
+    <div class="topbar">
+      <div class="topbar-title">
+        <span class="bar" id="topbarBar" style="background:var(--warning);"></span>
+        <strong id="topbarTitle">&Aacute;reas</strong>
+      </div>
+      <span class="sync" id="syncIndicator"><span class="dot"></span><span id="syncText">Conectando&hellip;</span></span>
+    </div>
+
+    <main class="content">
+
+      <div id="areasView">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="left"><i class="ti ti-building"></i><span id="areasCount">&Aacute;reas</span></div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="datatable" aria-label="Listado de &aacute;reas">
+              <thead>
+                <tr>
+                  <th>C&oacute;d.</th>
+                  <th>&Aacute;rea</th>
+                  <th>Estado</th>
+                  <th>Acci&oacute;n</th>
+                </tr>
+              </thead>
+              <tbody id="areasTbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </header>
 
-    <section class="summary" id="summaryTiles" aria-label="Resumen de cumplimiento"></section>
+      <div id="checklistView" hidden>
+        <button type="button" class="back-link" id="btnBackAreas"><i class="ti ti-arrow-left"></i>&nbsp;&Aacute;reas</button>
 
-    <section class="matrix-card">
-      <div class="matrix-scroll">
-        <table class="matrix" id="matrixTable" aria-label="Matriz de actividades de cierre por empresa"></table>
-      </div>
-    </section>
-
-    <section class="footer-grid">
-      <div class="note-card">
-        <div class="legend" style="margin-bottom:10px;">
-          <span class="legend-item"><span class="legend-swatch si"></span>S&iacute; &mdash; completado</span>
-          <span class="legend-item"><span class="legend-swatch no"></span>No &mdash; pendiente de cerrar</span>
-          <span class="legend-item"><span class="legend-swatch na"></span>N/A &mdash; no aplica</span>
-          <span class="legend-item"><span class="legend-swatch pendiente"></span>Sin revisar</span>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <p style="font-size:12.5px; color:var(--text3); max-width:56ch;">Seguimiento mensual de las actividades de cierre contable por empresa, a nivel regional.</p>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.06em;">Mes evaluado</span>
+            <select id="monthSelect" aria-label="Mes evaluado"></select>
+            <button class="btn" id="toggleNewMonth" type="button">+ Nuevo mes</button>
+            <div class="newmonth-panel" id="newMonthPanel">
+              <input type="month" id="newMonthInput" />
+              <button type="button" class="btn sm" id="btnNewBlank">Vac&iacute;o</button>
+              <button type="button" class="btn sm primary" id="btnNewDup">Duplicar mes actual</button>
+            </div>
+          </div>
         </div>
-        <div>Clic sobre una celda para cambiar su estado (S&iacute; &rarr; No &rarr; N/A &rarr; Sin revisar).</div>
-        <div style="margin-top:8px;"><b>Fecha l&iacute;mite de publicaci&oacute;n:</b> d&iacute;a 6 de cada mes, hasta finalizar el proceso de cierre regional.</div>
-      </div>
-      <div class="obs-card">
-        <label for="obsInput">Observaciones del mes</label>
-        <textarea id="obsInput" placeholder="Notas del equipo regional sobre el cierre de este mes&hellip;"></textarea>
-        <div class="save-hint" id="obsHint"></div>
-      </div>
-    </section>
 
-    <div class="meta-row">
-      <span id="lastUpdated">&nbsp;</span>
-      <span>Datos compartidos en tiempo real entre todo el equipo regional.</span>
-    </div>
+        <section class="summary" id="summaryTiles" aria-label="Resumen de cumplimiento"></section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div class="left"><i class="ti ti-checklist"></i><span>Matriz de cierre</span></div>
+          </div>
+          <div class="matrix-scroll">
+            <table class="matrix" id="matrixTable" aria-label="Matriz de actividades de cierre por empresa"></table>
+          </div>
+        </section>
+
+        <section class="footer-grid">
+          <div class="note-card">
+            <div class="legend" style="margin-bottom:10px;">
+              <span class="legend-item"><span class="legend-swatch si"></span>S&iacute; &mdash; completado</span>
+              <span class="legend-item"><span class="legend-swatch no"></span>No &mdash; pendiente de cerrar</span>
+              <span class="legend-item"><span class="legend-swatch na"></span>N/A &mdash; no aplica</span>
+              <span class="legend-item"><span class="legend-swatch pendiente"></span>Sin revisar</span>
+            </div>
+            <div>Clic sobre una celda para cambiar su estado (S&iacute; &rarr; No &rarr; N/A &rarr; Sin revisar).</div>
+            <div style="margin-top:8px;"><b>Fecha l&iacute;mite de publicaci&oacute;n:</b> d&iacute;a 6 de cada mes, hasta finalizar el proceso de cierre regional.</div>
+          </div>
+          <div class="obs-card">
+            <label for="obsInput">Observaciones del mes</label>
+            <textarea id="obsInput" placeholder="Notas del equipo regional sobre el cierre de este mes&hellip;"></textarea>
+            <div class="save-hint" id="obsHint"></div>
+          </div>
+        </section>
+
+        <div class="meta-row">
+          <span id="lastUpdated">&nbsp;</span>
+          <span>Datos compartidos en tiempo real entre todo el equipo regional.</span>
+        </div>
+      </div>
+
+    </main>
   </div>
-
 </div>
 
-<!-- Supabase (same project as Kielsa CI: auditores, países, áreas reales) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 (function(){
 
   // ---------------------------------------------------------------
-  // Supabase project: kielsa-ci (same database as Kielsa CI — real
-  // auditores / países / áreas live here, plus our own table
-  // "cierre_regional_estados" for the checklist statuses).
+  // Supabase project: kielsa-ci (same database as Kielsa CI). Real
+  // usuarios/auditores/países/áreas live here. This app uses the SAME
+  // login system as Kielsa CI (usuarios.usuario + password, verified
+  // via the login_usuario RPC) instead of Supabase Auth.
   // ---------------------------------------------------------------
   var SUPABASE_URL = "https://jvithjvoyvxeljlectli.supabase.co";
   var SUPABASE_ANON_KEY = "sb_publishable_s4Osr9pmviPCX6xfKrJQ2Q_vyKwmks-";
@@ -742,18 +541,13 @@ textarea{
   var COMPANY_BY_ID = {};
   COMPANIES.forEach(function(co){ COMPANY_BY_ID[co.id] = co; });
 
-  // ---------------------------------------------------------------
-  // Real auditors, countries and áreas: fetched live from Supabase
-  // ("auditores", "paises", "areas" — the same tables Kielsa CI uses)
-  // instead of hardcoded, via loadDirectory() near boot, below.
-  // Country ids match COUNTRIES[].id above; auditores.pais_ids (numeric,
-  // referencing paises.id) is translated to those ids using paises.codigo.
-  // ---------------------------------------------------------------
   var ALL_COUNTRY_IDS = COUNTRIES.map(function(c){ return c.id; });
-  var AUDITORS = {};       // filled by loadDirectory(): email -> { name, countries }
-  var AREAS = [];          // filled by loadDirectory(): real "areas" table rows
   var COUNTRY_NAME = {};
   COUNTRIES.forEach(function(c){ COUNTRY_NAME[c.id] = c.name; });
+
+  var AREAS = [];          // filled by loadDirectory(): real "areas" table rows
+  var AUDITORES = [];      // filled by loadDirectory(): real "auditores" table rows
+  var PAIS_ID_TO_CODE = {};
 
   var STATES = ['si','no','na','pendiente'];
   var STATE_LABEL = { si:'Sí', no:'No', na:'N/A', pendiente:'Sin revisar' };
@@ -761,8 +555,6 @@ textarea{
   function key(actId, coId){ return actId + '__' + coId; }
 
   // Seed data reflecting September 2026, as provided in the source file.
-  // Guatemala (Herdez, Moderna) has no reporting history -> N/A.
-  // Inventario / Tipo de Cambio only tracked for Honduras & El Salvador.
   function buildSeed(){
     var s = {};
     ACTIVITIES.forEach(function(a){
@@ -799,8 +591,30 @@ textarea{
   var obsSaveTimer = null;
   var obsDirty = false;
   var ready = false;
-  var currentAuditor = null;   // { name, countries } for the signed-in user, or null
-  var currentEmail = null;
+
+  var currentUser = null;      // usuarios row (no password) returned by login_usuario
+  var sessionUsuario = null;   // kept in memory only, needed to re-authorize each write
+  var sessionPassword = null;  // kept in memory only, never persisted
+  var currentAuditor = null;   // { name, countries } resolved for the signed-in usuario, or null
+
+  function resolveAuditor(u){
+    if (!u) return null;
+    if (u.rol === 'admin') return { name: u.nombre, countries: ALL_COUNTRY_IDS.slice() };
+    function fromAuditorRow(a){
+      var countries = (a.pais_ids || [])
+        .map(function(pid){ return PAIS_ID_TO_CODE[pid]; })
+        .filter(function(cid){ return cid && ALL_COUNTRY_IDS.indexOf(cid) !== -1; });
+      return { name: a.nombre || u.nombre, countries: countries };
+    }
+    if (u.auditor_id != null){
+      var a = AUDITORES.find(function(x){ return x.id === u.auditor_id; });
+      if (a) return fromAuditorRow(a);
+    }
+    var norm = (u.nombre || '').trim().toLowerCase();
+    var a2 = AUDITORES.find(function(x){ return (x.nombre || '').trim().toLowerCase() === norm; });
+    if (a2) return fromAuditorRow(a2);
+    return null;
+  }
 
   function canEditCompany(companyId){
     if (!currentAuditor) return false;
@@ -846,7 +660,7 @@ textarea{
   }
 
   // ---------------------------------------------------------------
-  // Rendering
+  // Rendering: checklist matrix
   // ---------------------------------------------------------------
   function computeStats(statuses){
     function scope(companies){
@@ -867,10 +681,10 @@ textarea{
   }
 
   function pctColor(pct){
-    if (pct===null) return 'var(--muted)';
-    if (pct>=90) return 'var(--ok)';
-    if (pct>=60) return 'var(--pending)';
-    return 'var(--bad)';
+    if (pct===null) return 'var(--text3)';
+    if (pct>=90) return 'var(--success)';
+    if (pct>=60) return 'var(--warning)';
+    return 'var(--danger)';
   }
 
   function renderSummary(statuses){
@@ -880,7 +694,7 @@ textarea{
 
     var g = stats.global;
     html += '<div class="tile global">' +
-      '<div class="tile-label"><span>Cumplimiento regional</span></div>' +
+      '<div class="tile-label">Cumplimiento regional</div>' +
       '<div class="tile-pct num" style="color:' + pctColor(g.pct) + '">' + (g.pct===null? '—' : g.pct+'%') + '</div>' +
       '<div class="tile-count num">' + g.si + ' de ' + g.applicable + ' actividades completadas</div>' +
       barHtml(g) +
@@ -889,7 +703,7 @@ textarea{
     stats.byCountry.forEach(function(c){
       var s = c.stats;
       html += '<div class="tile">' +
-        '<div class="tile-label"><span>' + c.name + '</span></div>' +
+        '<div class="tile-label">' + c.name + '</div>' +
         '<div class="tile-pct num" style="color:' + pctColor(s.pct) + '">' + (s.pct===null? '—' : s.pct+'%') + '</div>' +
         '<div class="tile-count num">' + s.si + '/' + s.applicable + ' completadas' + (s.na? ' · ' + s.na + ' N/A' : '') + '</div>' +
         barHtml(s) +
@@ -974,17 +788,21 @@ textarea{
   }
 
   // ---------------------------------------------------------------
-  // Persistence (Supabase table "cierre_regional_estados", one row per month)
+  // Persistence. Reads go straight to the table (open to anon, same
+  // as Kielsa CI's other tables). Writes go through the
+  // "guardar_cierre_estado" RPC, which re-checks usuario+password
+  // server-side before saving — the table itself has no anon write
+  // policy, so this is the only path in.
   // ---------------------------------------------------------------
   function writeDoc(){
-    if (!db || !ready) return;
+    if (!db || !ready || !sessionUsuario) return;
     docState.updatedAt = new Date().toISOString();
-    db.from('cierre_regional_estados').upsert({
-      mes: currentMonth,
-      statuses: docState.statuses,
-      notes: docState.notes || '',
-      updated_at: docState.updatedAt,
-      updated_by: currentEmail || null
+    db.rpc('guardar_cierre_estado', {
+      p_usuario: sessionUsuario,
+      p_password: sessionPassword,
+      p_mes: currentMonth,
+      p_statuses: docState.statuses,
+      p_notes: docState.notes || ''
     }).then(function(res){
       if (res.error){
         console.error('write failed', res.error);
@@ -1047,7 +865,7 @@ textarea{
   }
 
   // ---------------------------------------------------------------
-  // Wire up controls
+  // Wire up checklist controls
   // ---------------------------------------------------------------
   monthSelect.addEventListener('change', function(){ subscribeMonth(monthSelect.value); });
 
@@ -1097,135 +915,39 @@ textarea{
   });
 
   // ---------------------------------------------------------------
-  // Auth screen wiring (login / self-registro / recuperar contraseña)
-  // ---------------------------------------------------------------
-  var authOverlay = document.getElementById('authOverlay');
-  var appWrap = document.getElementById('appWrap');
-  var authForm = document.getElementById('authForm');
-  var authEmail = document.getElementById('authEmail');
-  var authPassword = document.getElementById('authPassword');
-  var authMsg = document.getElementById('authMsg');
-  var authTitle = document.getElementById('authTitle');
-  var authSubmit = document.getElementById('authSubmit');
-  var authMode = 'login'; // 'login' | 'signup'
-
-  function showAuthMsg(text, type){
-    authMsg.textContent = text;
-    authMsg.className = 'auth-msg show' + (type ? ' ' + type : '');
-  }
-  function clearAuthMsg(){ authMsg.className = 'auth-msg'; authMsg.textContent = ''; }
-
-  function setAuthMode(mode){
-    authMode = mode;
-    clearAuthMsg();
-    if (mode === 'signup'){
-      authTitle.textContent = 'Crear cuenta';
-      authSubmit.textContent = 'Crear cuenta';
-      authPassword.setAttribute('autocomplete','new-password');
-      document.getElementById('authSwitchToSignup').hidden = true;
-      document.getElementById('authSwitchToLogin').hidden = false;
-    } else {
-      authTitle.textContent = 'Iniciar sesión';
-      authSubmit.textContent = 'Entrar';
-      authPassword.setAttribute('autocomplete','current-password');
-      document.getElementById('authSwitchToSignup').hidden = false;
-      document.getElementById('authSwitchToLogin').hidden = true;
-    }
-  }
-  document.getElementById('authGoSignup').addEventListener('click', function(){ setAuthMode('signup'); });
-  document.getElementById('authGoLogin').addEventListener('click', function(){ setAuthMode('login'); });
-
-  document.getElementById('authForgot').addEventListener('click', function(){
-    var email = (authEmail.value || '').trim().toLowerCase();
-    if (!email){ showAuthMsg('Escribe tu correo arriba y luego pulsa "¿Olvidaste tu contraseña?".', 'error'); return; }
-    sb.auth.resetPasswordForEmail(email).then(function(res){
-      if (res.error){ showAuthMsg(authErrorMessage(res.error), 'error'); return; }
-      showAuthMsg('Te enviamos un enlace a ' + email + ' para crear una nueva contraseña.', 'ok');
-    });
-  });
-
-  function authErrorMessage(err){
-    var msg = (err && err.message) || '';
-    if (/invalid login credentials/i.test(msg)) return 'Correo o contraseña incorrectos.';
-    if (/user already registered/i.test(msg)) return 'Ya existe una cuenta con ese correo. Usa "Inicia sesión".';
-    if (/password should be at least/i.test(msg)) return 'La contraseña debe tener al menos 6 caracteres.';
-    if (/unable to validate email/i.test(msg) || /invalid email/i.test(msg)) return 'Correo inválido.';
-    if (/email not confirmed/i.test(msg)) return 'Confirma tu correo primero: revisa tu bandeja de entrada y haz clic en el enlace que te enviamos.';
-    if (/rate limit/i.test(msg)) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
-    return msg || 'No se pudo completar la solicitud. Intenta de nuevo.';
-  }
-
-  authForm.addEventListener('submit', function(ev){
-    ev.preventDefault();
-    var email = (authEmail.value || '').trim().toLowerCase();
-    var password = authPassword.value || '';
-    clearAuthMsg();
-
-    if (authMode === 'signup'){
-      if (!AUDITORS[email]){
-        showAuthMsg('Este correo no está en la lista de auditores autorizados. Contacta a Donny Rojas (drojas@kielsa.hn) para que te agregue.', 'error');
-        return;
-      }
-      authSubmit.disabled = true;
-      sb.auth.signUp({ email: email, password: password }).then(function(res){
-        if (res.error){ showAuthMsg(authErrorMessage(res.error), 'error'); return; }
-        if (res.data && res.data.session){
-          // Signed in immediately (only happens if email confirmation is off).
-        } else {
-          showAuthMsg('Cuenta creada. Revisa tu correo (' + email + ') y confirma tu cuenta, luego inicia sesión.', 'ok');
-          setAuthMode('login');
-        }
-      }).finally(function(){ authSubmit.disabled = false; });
-    } else {
-      authSubmit.disabled = true;
-      sb.auth.signInWithPassword({ email: email, password: password }).then(function(res){
-        if (res.error){ showAuthMsg(authErrorMessage(res.error), 'error'); }
-      }).finally(function(){ authSubmit.disabled = false; });
-    }
-  });
-
-  document.getElementById('btnLogout').addEventListener('click', function(){
-    sb.auth.signOut();
-  });
-
-  function applyAuditorUI(){
-    var nameEl = document.getElementById('sessionName');
-    var pillEl = document.getElementById('scopePill');
-    if (currentAuditor){
-      nameEl.textContent = currentAuditor.name + ' (' + currentEmail + ')';
-      pillEl.textContent = isAdmin() ? 'Edita: todos los países' : 'Edita: ' + currentAuditor.countries.map(function(id){ return COUNTRY_NAME[id]; }).join(', ');
-    } else {
-      nameEl.textContent = currentEmail || '—';
-      pillEl.textContent = 'Solo lectura (correo no registrado como auditor)';
-    }
-    document.getElementById('toggleNewMonth').hidden = !isAdmin();
-  }
-
-  // ---------------------------------------------------------------
   // Áreas view: real "areas" table from Supabase. "Checklist" opens
-  // this app's matrix; every other área is shown for context only
-  // (it lives in Kielsa CI, not here).
+  // this app's matrix; every other área is informational only (it
+  // lives in Kielsa CI, not here) — same pattern as Kielsa CI's own
+  // Áreas admin screen (a plain table), restyled to match.
   // ---------------------------------------------------------------
   var areasView = document.getElementById('areasView');
   var checklistView = document.getElementById('checklistView');
+  var topbarBar = document.getElementById('topbarBar');
+  var topbarTitle = document.getElementById('topbarTitle');
+  var navAreas = document.getElementById('navAreas');
 
-  function renderAreasGrid(){
-    var grid = document.getElementById('areasGrid');
+  function renderAreasTable(){
+    document.getElementById('areasCount').textContent = AREAS.length + ' áreas';
+    var tbody = document.getElementById('areasTbody');
     if (!AREAS.length){
-      grid.innerHTML = '<p class="subtitle">No se pudieron cargar las áreas.</p>';
+      tbody.innerHTML = '<tr><td colspan="4" class="area-muted-note">No se pudieron cargar las áreas.</td></tr>';
       return;
     }
     var html = '';
     AREAS.forEach(function(a){
       var isChecklist = (a.nombre || '').trim().toLowerCase() === 'checklist';
-      html += '<button type="button" class="area-card' + (isChecklist ? ' active' : ' disabled') + '" data-area-id="' + a.id + '"' + (isChecklist ? '' : ' disabled') + '>' +
-        '<div class="area-code">' + (a.codigo || '') + '</div>' +
-        '<div class="area-name">' + a.nombre + '</div>' +
-        '<div class="area-hint">' + (isChecklist ? 'Entrar →' : 'Disponible en Kielsa CI') + '</div>' +
-        '</button>';
+      html += '<tr>' +
+        '<td class="area-code">' + (a.codigo || '—') + '</td>' +
+        '<td class="area-name">' + a.nombre + '</td>' +
+        '<td><span class="pill ' + (isChecklist ? 'ok' : 'muted') + '">' + (a.estado || 'Activo') + '</span></td>' +
+        '<td>' + (isChecklist
+          ? '<button type="button" class="btn sm primary" data-open-checklist="1">Abrir <i class="ti ti-arrow-right"></i></button>'
+          : '<span class="area-muted-note">Disponible en Kielsa CI</span>') +
+        '</td>' +
+      '</tr>';
     });
-    grid.innerHTML = html;
-    grid.querySelectorAll('.area-card.active').forEach(function(btn){
+    tbody.innerHTML = html;
+    tbody.querySelectorAll('[data-open-checklist]').forEach(function(btn){
       btn.addEventListener('click', showChecklistView);
     });
   }
@@ -1233,55 +955,144 @@ textarea{
   function showAreasView(){
     checklistView.hidden = true;
     areasView.hidden = false;
+    navAreas.classList.add('active');
+    topbarBar.style.background = 'var(--warning)';
+    topbarTitle.textContent = 'Áreas';
   }
   function showChecklistView(){
     areasView.hidden = true;
     checklistView.hidden = false;
+    topbarBar.style.background = 'var(--primary)';
+    topbarTitle.textContent = 'Checklist · Cierre Contable Regional';
   }
   document.getElementById('btnBackAreas').addEventListener('click', showAreasView);
+  navAreas.addEventListener('click', showAreasView);
 
   // ---------------------------------------------------------------
   // Directory: load real países / auditores / áreas from Supabase.
-  // These tables are public-read, so this works before login too.
+  // These tables are open to anon (same as the rest of this schema).
   // ---------------------------------------------------------------
   function loadDirectory(){
     return Promise.all([
       db.from('paises').select('id,nombre,codigo'),
-      db.from('auditores').select('nombre,email,pais_ids,estado'),
-      db.from('areas').select('id,codigo,nombre').order('id')
+      db.from('auditores').select('id,nombre,email,pais_ids,estado'),
+      db.from('areas').select('id,codigo,nombre,estado').order('id')
     ]).then(function(results){
       var paisesRes = results[0], auditoresRes = results[1], areasRes = results[2];
 
-      var PAIS_ID_TO_CODE = {};
+      PAIS_ID_TO_CODE = {};
       (paisesRes.data || []).forEach(function(p){
         if (p.codigo) PAIS_ID_TO_CODE[p.id] = p.codigo.toLowerCase();
       });
 
-      var newAuditors = {};
-      (auditoresRes.data || []).forEach(function(a){
-        if (!a.email) return;
-        var countries = (a.pais_ids || [])
-          .map(function(pid){ return PAIS_ID_TO_CODE[pid]; })
-          .filter(function(cid){ return cid && ALL_COUNTRY_IDS.indexOf(cid) !== -1; });
-        newAuditors[a.email.toLowerCase()] = { name: a.nombre || a.email, countries: countries };
-      });
-      AUDITORS = newAuditors;
-
+      AUDITORES = auditoresRes.data || [];
       AREAS = areasRes.data || [];
-      renderAreasGrid();
+      renderAreasTable();
 
       // Refresh session UI/permissions in case directory arrived after login.
-      if (currentEmail){
-        currentAuditor = AUDITORS[currentEmail] || null;
-        applyAuditorUI();
+      if (currentUser){
+        currentAuditor = resolveAuditor(currentUser);
+        applyUserUI();
         renderCells(docState.statuses);
       }
     }).catch(function(e){ console.error('loadDirectory failed', e); });
   }
 
   // ---------------------------------------------------------------
-  // Boot: init Supabase, render skeleton, load directory, then react
-  // to auth state.
+  // Login (same mechanism as Kielsa CI: usuarios.usuario + password,
+  // verified server-side by the login_usuario RPC — no Supabase Auth,
+  // no self-registration).
+  // ---------------------------------------------------------------
+  var authOverlay = document.getElementById('authOverlay');
+  var appShell = document.getElementById('appShell');
+  var authForm = document.getElementById('authForm');
+  var authUser = document.getElementById('authUser');
+  var authPass = document.getElementById('authPass');
+  var authMsg = document.getElementById('authMsg');
+  var authMsgText = document.getElementById('authMsgText');
+  var authSubmit = document.getElementById('authSubmit');
+  var authSubmitText = document.getElementById('authSubmitText');
+
+  function showAuthError(text){
+    authMsgText.textContent = text;
+    authMsg.classList.add('show');
+  }
+  function clearAuthError(){
+    authMsg.classList.remove('show');
+    authMsgText.textContent = '';
+  }
+
+  function applyUserUI(){
+    var nameEl = document.getElementById('sbUserName');
+    var roleEl = document.getElementById('sbUserRole');
+    nameEl.textContent = currentUser.nombre || currentUser.usuario;
+    if (currentAuditor){
+      roleEl.textContent = isAdmin() ? 'Administrador' : currentAuditor.countries.map(function(id){ return COUNTRY_NAME[id]; }).join(', ');
+    } else {
+      roleEl.textContent = currentUser.rol === 'admin' ? 'Administrador' : 'Solo lectura';
+    }
+    document.getElementById('toggleNewMonth').hidden = !isAdmin();
+  }
+
+  function enterApp(){
+    authOverlay.hidden = true;
+    appShell.hidden = false;
+    showAreasView();
+    ready = true;
+    syncText.textContent = 'Sincronizado';
+    syncIndicator.classList.remove('offline','error');
+    subscribeMonth(monthSelect.value || '2026-09');
+  }
+
+  function exitApp(){
+    ready = false;
+    currentUser = null;
+    currentAuditor = null;
+    sessionUsuario = null;
+    sessionPassword = null;
+    if (unsub){ unsub.unsubscribe(); unsub = null; }
+    authOverlay.hidden = false;
+    appShell.hidden = true;
+    authPass.value = '';
+    clearAuthError();
+  }
+
+  authForm.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var usuario = (authUser.value || '').trim();
+    var password = authPass.value || '';
+    clearAuthError();
+    if (!db){ showAuthError('No se pudo conectar con el servidor. Revisa tu conexión a internet.'); return; }
+
+    authSubmit.disabled = true;
+    authSubmitText.innerHTML = '<i class="ti ti-loader-2 spin"></i> Verificando…';
+
+    db.rpc('login_usuario', { p_usuario: usuario, p_password: password }).then(function(res){
+      if (res.error){
+        console.error('login failed', res.error);
+        showAuthError('No se pudo iniciar sesión. Intenta de nuevo.');
+        return;
+      }
+      if (!res.data){
+        showAuthError('Usuario o contraseña incorrectos');
+        return;
+      }
+      currentUser = res.data;
+      sessionUsuario = usuario;
+      sessionPassword = password;
+      currentAuditor = resolveAuditor(currentUser);
+      applyUserUI();
+      enterApp();
+    }).finally(function(){
+      authSubmit.disabled = false;
+      authSubmitText.textContent = 'Entrar';
+    });
+  });
+
+  document.getElementById('btnLogout').addEventListener('click', exitApp);
+
+  // ---------------------------------------------------------------
+  // Boot: init Supabase, render skeleton, load directory.
   // ---------------------------------------------------------------
   renderMatrixSkeleton();
   ensureMonthOption('2026-09', true);
@@ -1289,46 +1100,16 @@ textarea{
   if (thisMonth !== '2026-09') ensureMonthOption(thisMonth, false);
   renderAll();
 
-  var sb = null;
   try{
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    db = sb;
-
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     loadDirectory();
-
-    sb.auth.onAuthStateChange(function(event, session){
-      var user = session && session.user;
-      if (user && user.email){
-        currentEmail = user.email.toLowerCase();
-        currentAuditor = AUDITORS[currentEmail] || null;
-        applyAuditorUI();
-
-        authOverlay.hidden = true;
-        appWrap.hidden = false;
-        showAreasView();
-
-        ready = true;
-        syncText.textContent = 'Sincronizado';
-        syncIndicator.classList.remove('offline','error');
-        subscribeMonth(monthSelect.value || '2026-09');
-      } else {
-        // Signed out -> show login screen
-        ready = false;
-        currentAuditor = null;
-        currentEmail = null;
-        if (unsub){ unsub.unsubscribe(); unsub = null; }
-        authOverlay.hidden = false;
-        appWrap.hidden = true;
-        authPassword.value = '';
-        setAuthMode('login');
-      }
-    });
   } catch(e){
     console.error('supabase init failed', e);
-    showAuthMsg('No se pudo conectar con el servidor. Revisa tu conexión a internet.', 'error');
+    showAuthError('No se pudo conectar con el servidor. Revisa tu conexión a internet.');
   }
 
 })();
+
 </script>
 </body>
 </html>
