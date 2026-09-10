@@ -324,6 +324,31 @@ select#monthSelect{
   font-family:inherit; font-size:13px; color:var(--text); background:var(--surface);
   border:1px solid var(--border2); border-radius:8px; padding:.42rem .7rem;
 }
+
+/* ---------- administración: usuarios / actividades / empresas ---------- */
+.admin-tabs{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.admin-form{
+  padding:14px 16px; border-bottom:1px solid var(--border);
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px;
+  background:var(--grayBg);
+}
+.admin-form .af-field label{
+  display:block; font-size:10px; font-weight:700; color:var(--text3);
+  text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;
+}
+.admin-form .af-field input, .admin-form .af-field select{
+  width:100%; font-family:inherit; font-size:13px; color:var(--text);
+  background:#fff; border:1px solid var(--border2); border-radius:8px; padding:.45rem .6rem;
+}
+.admin-form .af-actions{ display:flex; gap:8px; align-items:flex-end; }
+.admin-form .af-msg{ grid-column:1/-1; font-size:12px; color:var(--danger); }
+.subgroup-label{
+  font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--primary); padding:10px 16px 4px; background:var(--primaryLight);
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.icon-btn{ background:transparent; border:none; cursor:pointer; color:var(--text3); font-size:14px; padding:2px 4px; }
+.icon-btn:hover{ color:var(--danger); }
 </style>
 </head>
 <body>
@@ -363,6 +388,7 @@ select#monthSelect{
       <div class="sb-group-label">M&oacute;dulos</div>
       <div class="sb-item active" id="navChecklist"><i class="ti ti-checklist"></i>Checklist</div>
       <div class="sb-item" id="navReport"><i class="ti ti-chart-bar"></i>Reporte</div>
+      <div class="sb-item" id="navAdmin"><i class="ti ti-settings"></i>Administraci&oacute;n</div>
     </nav>
     <div class="sb-foot">
       <div class="sb-user">
@@ -430,6 +456,91 @@ select#monthSelect{
         <section class="summary" id="summaryTiles" aria-label="Resumen de cumplimiento"></section>
       </div>
 
+      <div id="adminView" hidden>
+        <div class="admin-tabs">
+          <button type="button" class="btn sm primary" id="tabBtnUsuarios">Usuarios</button>
+          <button type="button" class="btn sm" id="tabBtnActividades">Actividades de cierre</button>
+          <button type="button" class="btn sm" id="tabBtnEmpresas">Empresas</button>
+        </div>
+
+        <section class="panel" id="adminPanelUsuarios">
+          <div class="panel-head">
+            <div class="left"><i class="ti ti-users"></i><span>Usuarios</span></div>
+            <div class="right"><button type="button" class="btn sm primary" id="btnNuevoUsuario">+ Nuevo usuario</button></div>
+          </div>
+          <div class="admin-form" id="formUsuario" hidden>
+            <input type="hidden" id="usrId">
+            <div class="af-field"><label>Usuario</label><input type="text" id="usrUsuario" autocomplete="off"></div>
+            <div class="af-field"><label>Nombre</label><input type="text" id="usrNombre"></div>
+            <div class="af-field"><label>Contrase&ntilde;a</label><input type="password" id="usrPassword" autocomplete="new-password" placeholder="Contrase&ntilde;a"></div>
+            <div class="af-field"><label>Rol</label><select id="usrRol"><option value="auditor">Auditor</option><option value="admin">Administrador</option></select></div>
+            <div class="af-field"><label>Auditor vinculado</label><select id="usrAuditorId"><option value="">(ninguno)</option></select></div>
+            <div class="af-field"><label>Estado</label><select id="usrEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select></div>
+            <div class="af-actions">
+              <button type="button" class="btn sm primary" id="btnGuardarUsuario">Guardar</button>
+              <button type="button" class="btn sm" id="btnCancelarUsuario">Cancelar</button>
+            </div>
+            <div class="af-msg" id="usrMsg"></div>
+          </div>
+          <div class="matrix-scroll"><table class="datatable"><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Auditor</th><th>Estado</th><th></th></tr></thead><tbody id="usuariosTbody"></tbody></table></div>
+        </section>
+
+        <section class="panel" id="adminPanelActividades" hidden>
+          <div class="panel-head">
+            <div class="left"><i class="ti ti-list-check"></i><span>Actividades de cierre</span></div>
+            <div class="right">
+              <button type="button" class="btn sm" id="btnNuevoGrupo">+ Nuevo grupo</button>
+              <button type="button" class="btn sm primary" id="btnNuevaActividad">+ Nueva actividad</button>
+            </div>
+          </div>
+          <div class="admin-form" id="formGrupo" hidden>
+            <input type="hidden" id="grpId">
+            <div class="af-field"><label>Nombre del grupo</label><input type="text" id="grpNombre"></div>
+            <div class="af-field"><label>C&oacute;digo (interno)</label><input type="text" id="grpCodigo"></div>
+            <div class="af-field"><label>Orden</label><input type="number" id="grpOrden" value="0"></div>
+            <div class="af-actions">
+              <button type="button" class="btn sm primary" id="btnGuardarGrupo">Guardar grupo</button>
+              <button type="button" class="btn sm" id="btnCancelarGrupo">Cancelar</button>
+            </div>
+            <div class="af-msg" id="grpMsg"></div>
+          </div>
+          <div class="admin-form" id="formActividad" hidden>
+            <input type="hidden" id="actId">
+            <div class="af-field"><label>Grupo</label><select id="actGrupoId"></select></div>
+            <div class="af-field"><label>Nombre de la actividad</label><input type="text" id="actNombre"></div>
+            <div class="af-field"><label>C&oacute;digo (interno)</label><input type="text" id="actCodigo"></div>
+            <div class="af-field"><label>Orden</label><input type="number" id="actOrden" value="0"></div>
+            <div class="af-actions">
+              <button type="button" class="btn sm primary" id="btnGuardarActividad">Guardar actividad</button>
+              <button type="button" class="btn sm" id="btnCancelarActividad">Cancelar</button>
+            </div>
+            <div class="af-msg" id="actMsg"></div>
+          </div>
+          <div id="actividadesAdminList"></div>
+        </section>
+
+        <section class="panel" id="adminPanelEmpresas" hidden>
+          <div class="panel-head">
+            <div class="left"><i class="ti ti-building"></i><span>Empresas a revisar</span></div>
+            <div class="right"><button type="button" class="btn sm primary" id="btnNuevaEmpresa">+ Nueva empresa</button></div>
+          </div>
+          <div class="admin-form" id="formEmpresa" hidden>
+            <input type="hidden" id="empId">
+            <div class="af-field"><label>Pa&iacute;s</label><select id="empPaisId"></select></div>
+            <div class="af-field"><label>Nombre de la empresa</label><input type="text" id="empNombre"></div>
+            <div class="af-field"><label>C&oacute;digo (interno)</label><input type="text" id="empCodigo"></div>
+            <div class="af-field"><label>Orden</label><input type="number" id="empOrden" value="0"></div>
+            <div class="af-field"><label>Estado</label><select id="empEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select></div>
+            <div class="af-actions">
+              <button type="button" class="btn sm primary" id="btnGuardarEmpresa">Guardar empresa</button>
+              <button type="button" class="btn sm" id="btnCancelarEmpresa">Cancelar</button>
+            </div>
+            <div class="af-msg" id="empMsg"></div>
+          </div>
+          <div class="matrix-scroll"><table class="datatable"><thead><tr><th>Pa&iacute;s</th><th>Empresa</th><th>C&oacute;digo</th><th>Estado</th><th></th></tr></thead><tbody id="empresasTbody"></tbody></table></div>
+        </section>
+      </div>
+
       <div class="meta-row">
         <span id="lastUpdated">&nbsp;</span>
         <span>Datos compartidos en tiempo real entre todo el equipo regional.</span>
@@ -453,70 +564,55 @@ select#monthSelect{
   var SUPABASE_ANON_KEY = "sb_publishable_s4Osr9pmviPCX6xfKrJQ2Q_vyKwmks-";
 
   // ---------------------------------------------------------------
-  // Static structure: countries, companies, activity groups
+  // Structure: countries, companies and activity groups now come from
+  // Supabase (cierre_grupos / cierre_actividades / cierre_empresas /
+  // paises) instead of being fixed in this file — se administran desde
+  // el módulo "Administración". buildStructures() arma estos arreglos
+  // (usando el mismo "codigo" que antes era el id fijo, para que el
+  // checklist ya guardado en cierre_regional_estados no se rompa).
   // ---------------------------------------------------------------
-  var COUNTRIES = [
-    { id:'hn', name:'Honduras', companies:[
-      { id:'hn-fundacion', name:'Fundación' },
-      { id:'hn-nextfin', name:'Nextfin' },
-      { id:'hn-kielsa', name:'Kielsa' }
-    ]},
-    { id:'sv', name:'El Salvador', companies:[
-      { id:'sv-moraleslopez', name:'Morales López' },
-      { id:'sv-netxfin', name:'Netxfin' }
-    ]},
-    { id:'ni', name:'Nicaragua', companies:[
-      { id:'ni-hconer', name:'HC Oner' },
-      { id:'ni-kielsa', name:'Kielsa' }
-    ]},
-    { id:'gt', name:'Guatemala', companies:[
-      { id:'gt-herdez', name:'Herdez' },
-      { id:'gt-moderna', name:'Moderna' },
-      { id:'gt-hrone', name:'HR ONE' }
-    ]},
-    { id:'cr', name:'Costa Rica', companies:[
-      { id:'cr-arboleda', name:'Arboleda' },
-      { id:'cr-hrone', name:'HRONE' },
-      { id:'cr-moderna', name:'Moderna' }
-    ]}
-  ];
-
-  var GROUPS = [
-    { id:'cierre', name:'Cierre operativo', activities:[
-      { id:'cxp', name:'Cuentas por Pagar (CXP)' },
-      { id:'cxc', name:'Cuentas por Cobrar (CXC)' },
-      { id:'bancos', name:'Bancos' },
-      { id:'inventario', name:'Inventario' },
-      { id:'tipocambio', name:'Tipo de Cambio' },
-      { id:'activosfijos', name:'Activos Fijos' }
-    ]},
-    { id:'auxiliares', name:'Conciliación de auxiliares', activities:[
-      { id:'concxc', name:'Concil. Auxiliares CXC' },
-      { id:'concxp', name:'Concil. Auxiliares CXP' },
-      { id:'conbancos', name:'Concil. Auxiliares Bancos' },
-      { id:'coninventario', name:'Concil. Auxiliares Inventario' }
-    ]},
-    { id:'cierrefinal', name:'Cierre y conciliaciones bancarias', activities:[
-      { id:'cierrecontable', name:'Cierre Contable' },
-      { id:'concbancarias', name:'Conciliaciones Bancarias' }
-    ]},
-    { id:'auditoria', name:'Auditoría e integración', activities:[
-      { id:'audfarinter', name:'Hallazgos Auditoría Farinter' },
-      { id:'audkielsa', name:'Hallazgos Auditoría Kielsa' },
-      { id:'integracionbalance', name:'Integración de Cuentas de Balance' }
-    ]}
-  ];
-
+  var COUNTRIES = [];
+  var GROUPS = [];
   var COMPANIES = [];
-  COUNTRIES.forEach(function(c){ c.companies.forEach(function(co){ COMPANIES.push(co); co.countryId = c.id; }); });
   var ACTIVITIES = [];
-  GROUPS.forEach(function(g){ g.activities.forEach(function(a){ ACTIVITIES.push(a); }); });
   var COMPANY_BY_ID = {};
-  COMPANIES.forEach(function(co){ COMPANY_BY_ID[co.id] = co; });
-
-  var ALL_COUNTRY_IDS = COUNTRIES.map(function(c){ return c.id; });
+  var ALL_COUNTRY_IDS = [];
   var COUNTRY_NAME = {};
-  COUNTRIES.forEach(function(c){ COUNTRY_NAME[c.id] = c.name; });
+
+  var PAISES_DB = [];
+  var GRUPOS_DB = [];
+  var ACTIVIDADES_DB = [];
+  var EMPRESAS_DB = [];
+  var USUARIOS_DB = [];
+
+  function buildStructures(){
+    var gruposSorted = GRUPOS_DB.slice().sort(function(a,b){ return (a.orden-b.orden) || (a.id-b.id); });
+    GROUPS = gruposSorted.map(function(g){
+      var acts = ACTIVIDADES_DB.filter(function(a){ return a.grupo_id === g.id; })
+        .sort(function(a,b){ return (a.orden-b.orden) || (a.id-b.id); })
+        .map(function(a){ return { id:a.codigo, name:a.nombre, dbId:a.id, grupoDbId:a.grupo_id }; });
+      return { id:g.codigo, name:g.nombre, dbId:g.id, activities:acts };
+    });
+    ACTIVITIES = [];
+    GROUPS.forEach(function(g){ g.activities.forEach(function(a){ ACTIVITIES.push(a); }); });
+
+    var paisesSorted = PAISES_DB.slice().sort(function(a,b){ return a.id-b.id; });
+    COUNTRIES = paisesSorted.filter(function(p){ return p.codigo; }).map(function(p){
+      var cid = p.codigo.toLowerCase();
+      var comps = EMPRESAS_DB.filter(function(e){ return e.pais_id === p.id && e.estado !== 'Inactivo'; })
+        .sort(function(a,b){ return (a.orden-b.orden) || (a.id-b.id); })
+        .map(function(e){ return { id:e.codigo, name:e.nombre, dbId:e.id, countryId:cid }; });
+      return { id:cid, name:p.nombre, dbId:p.id, companies:comps };
+    });
+    COMPANIES = [];
+    COUNTRIES.forEach(function(c){ c.companies.forEach(function(co){ COMPANIES.push(co); }); });
+    COMPANY_BY_ID = {};
+    COMPANIES.forEach(function(co){ COMPANY_BY_ID[co.id] = co; });
+
+    ALL_COUNTRY_IDS = COUNTRIES.map(function(c){ return c.id; });
+    COUNTRY_NAME = {};
+    COUNTRIES.forEach(function(c){ COUNTRY_NAME[c.id] = c.name; });
+  }
 
   var AUDITORES = [];      // filled by loadDirectory(): real "auditores" table rows
   var PAIS_ID_TO_CODE = {};
@@ -563,6 +659,8 @@ select#monthSelect{
   var obsSaveTimer = null;
   var obsDirty = false;
   var ready = false;
+  var directoryReady = false;  // true once países/actividades/empresas ya cargaron
+  var pendingEnter = false;    // true si el login terminó antes de que directoryReady
 
   var currentUser = null;      // usuarios row (no password) returned by login_usuario
   var sessionUsuario = null;   // kept in memory only, needed to re-authorize each write
@@ -896,21 +994,47 @@ select#monthSelect{
   });
 
   // ---------------------------------------------------------------
-  // Directory: load real países / auditores from Supabase.
-  // These tables are open to anon (same as the rest of this schema).
+  // Configuración del cierre: países, grupos, actividades y empresas.
+  // Se administran desde el módulo "Administración"; cada vez que algo
+  // cambia ahí, se vuelve a llamar loadCierreConfig() para refrescar
+  // el checklist con la estructura nueva.
+  // ---------------------------------------------------------------
+  function loadCierreConfig(){
+    return Promise.all([
+      db.from('paises').select('id,nombre,codigo'),
+      db.from('cierre_grupos').select('*'),
+      db.from('cierre_actividades').select('*'),
+      db.from('cierre_empresas').select('*')
+    ]).then(function(results){
+      PAISES_DB = results[0].data || [];
+      GRUPOS_DB = results[1].data || [];
+      ACTIVIDADES_DB = results[2].data || [];
+      EMPRESAS_DB = results[3].data || [];
+
+      PAIS_ID_TO_CODE = {};
+      PAISES_DB.forEach(function(p){ if (p.codigo) PAIS_ID_TO_CODE[p.id] = p.codigo.toLowerCase(); });
+
+      buildStructures();
+      renderMatrixSkeleton();
+      renderAll();
+      if (isAdmin()){
+        renderActividadesAdmin();
+        renderEmpresasAdmin();
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Directory: load real países/actividades/empresas/auditores from
+  // Supabase. These tables are open to anon (same as the rest of this
+  // schema); solo la escritura de actividades/empresas pasa por RPC.
   // ---------------------------------------------------------------
   function loadDirectory(){
     return Promise.all([
-      db.from('paises').select('id,nombre,codigo'),
+      loadCierreConfig(),
       db.from('auditores').select('id,nombre,email,pais_ids,estado')
     ]).then(function(results){
-      var paisesRes = results[0], auditoresRes = results[1];
-
-      PAIS_ID_TO_CODE = {};
-      (paisesRes.data || []).forEach(function(p){
-        if (p.codigo) PAIS_ID_TO_CODE[p.id] = p.codigo.toLowerCase();
-      });
-
+      var auditoresRes = results[1];
       AUDITORES = auditoresRes.data || [];
 
       // Refresh session UI/permissions in case directory arrived after login.
@@ -919,7 +1043,11 @@ select#monthSelect{
         applyUserUI();
         renderCells(docState.statuses);
       }
-    }).catch(function(e){ console.error('loadDirectory failed', e); });
+    }).catch(function(e){
+      console.error('loadDirectory failed', e);
+      var mc = document.getElementById('matrixContainer');
+      if (mc) mc.innerHTML = '<div class="panel" style="padding:20px;color:var(--danger);">No se pudo cargar la configuración del checklist. Revisa tu conexión e intenta de nuevo.</div>';
+    });
   }
 
   // ---------------------------------------------------------------
@@ -928,30 +1056,414 @@ select#monthSelect{
   // ---------------------------------------------------------------
   var checklistView = document.getElementById('checklistView');
   var reportView = document.getElementById('reportView');
+  var adminView = document.getElementById('adminView');
   var navChecklist = document.getElementById('navChecklist');
   var navReport = document.getElementById('navReport');
+  var navAdmin = document.getElementById('navAdmin');
   var topbarBar = document.getElementById('topbarBar');
   var topbarTitle = document.getElementById('topbarTitle');
 
   function showChecklistView(){
     reportView.hidden = true;
+    adminView.hidden = true;
     checklistView.hidden = false;
     navChecklist.classList.add('active');
     navReport.classList.remove('active');
+    navAdmin.classList.remove('active');
     topbarBar.style.background = 'var(--primary)';
     topbarTitle.textContent = 'Checklist · Cierre Contable Regional';
   }
   function showReportView(){
     checklistView.hidden = true;
+    adminView.hidden = true;
     reportView.hidden = false;
     navReport.classList.add('active');
     navChecklist.classList.remove('active');
+    navAdmin.classList.remove('active');
     topbarBar.style.background = 'var(--purple)';
     topbarTitle.textContent = 'Reporte · Cumplimiento Regional';
     renderSummary(docState.statuses);
   }
+  function showAdminView(){
+    if (!isAdmin()) return;
+    checklistView.hidden = true;
+    reportView.hidden = true;
+    adminView.hidden = false;
+    navAdmin.classList.add('active');
+    navChecklist.classList.remove('active');
+    navReport.classList.remove('active');
+    topbarBar.style.background = 'var(--gray)';
+    topbarTitle.textContent = 'Administración · Cierre Contable Regional';
+    showAdminTab('usuarios');
+    loadUsuarios();
+    renderActividadesAdmin();
+    renderEmpresasAdmin();
+  }
   navChecklist.addEventListener('click', showChecklistView);
   navReport.addEventListener('click', showReportView);
+  navAdmin.addEventListener('click', showAdminView);
+
+  // ---------------------------------------------------------------
+  // Administración: sub-pestañas Usuarios / Actividades / Empresas
+  // ---------------------------------------------------------------
+  var tabBtnUsuarios = document.getElementById('tabBtnUsuarios');
+  var tabBtnActividades = document.getElementById('tabBtnActividades');
+  var tabBtnEmpresas = document.getElementById('tabBtnEmpresas');
+  var adminPanelUsuarios = document.getElementById('adminPanelUsuarios');
+  var adminPanelActividades = document.getElementById('adminPanelActividades');
+  var adminPanelEmpresas = document.getElementById('adminPanelEmpresas');
+
+  function showAdminTab(tab){
+    adminPanelUsuarios.hidden = tab !== 'usuarios';
+    adminPanelActividades.hidden = tab !== 'actividades';
+    adminPanelEmpresas.hidden = tab !== 'empresas';
+    tabBtnUsuarios.classList.toggle('primary', tab === 'usuarios');
+    tabBtnActividades.classList.toggle('primary', tab === 'actividades');
+    tabBtnEmpresas.classList.toggle('primary', tab === 'empresas');
+  }
+  tabBtnUsuarios.addEventListener('click', function(){ showAdminTab('usuarios'); });
+  tabBtnActividades.addEventListener('click', function(){ showAdminTab('actividades'); });
+  tabBtnEmpresas.addEventListener('click', function(){ showAdminTab('empresas'); });
+
+  function slugify(s){
+    return (s || '').toString().toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  // ---------- Usuarios: igual que Kielsa CI — escritura directa a la
+  // tabla "usuarios" (RLS abierta ahí), con un trigger en la base de
+  // datos que hashea la contraseña automáticamente. ----------
+  function loadUsuarios(){
+    return db.from('usuarios').select('id,usuario,nombre,rol,auditor_id,estado').order('usuario').then(function(res){
+      if (res.error){ console.error('load usuarios failed', res.error); return; }
+      USUARIOS_DB = res.data || [];
+      renderUsuariosTable();
+    });
+  }
+
+  function renderUsuariosTable(){
+    var tbody = document.getElementById('usuariosTbody');
+    if (!tbody) return;
+    var html = '';
+    USUARIOS_DB.forEach(function(u){
+      var auditorNombre = '—';
+      if (u.auditor_id != null){
+        var a = AUDITORES.find(function(x){ return x.id === u.auditor_id; });
+        if (a) auditorNombre = a.nombre;
+      }
+      html += '<tr>' +
+        '<td>' + u.usuario + '</td>' +
+        '<td>' + (u.nombre || '') + '</td>' +
+        '<td>' + (u.rol === 'admin' ? 'Administrador' : 'Auditor') + '</td>' +
+        '<td>' + auditorNombre + '</td>' +
+        '<td><span class="pill ' + (u.estado === 'Activo' ? 'ok' : 'muted') + '">' + u.estado + '</span></td>' +
+        '<td><button type="button" class="icon-btn" data-edit-usuario="' + u.id + '" title="Editar"><i class="ti ti-edit"></i></button> ' +
+            '<button type="button" class="icon-btn" data-del-usuario="' + u.id + '" title="Eliminar"><i class="ti ti-trash"></i></button></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html || '<tr><td colspan="6" style="color:var(--text3);">Sin usuarios.</td></tr>';
+    tbody.querySelectorAll('[data-edit-usuario]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openUsuarioForm(parseInt(btn.getAttribute('data-edit-usuario'), 10)); });
+    });
+    tbody.querySelectorAll('[data-del-usuario]').forEach(function(btn){
+      btn.addEventListener('click', function(){ eliminarUsuario(parseInt(btn.getAttribute('data-del-usuario'), 10)); });
+    });
+  }
+
+  function fillAuditorSelect(sel, selected){
+    var html = '<option value="">(ninguno)</option>';
+    AUDITORES.forEach(function(a){ html += '<option value="' + a.id + '">' + a.nombre + '</option>'; });
+    sel.innerHTML = html;
+    sel.value = (selected != null) ? String(selected) : '';
+  }
+
+  function openUsuarioForm(id){
+    var form = document.getElementById('formUsuario');
+    document.getElementById('usrMsg').textContent = '';
+    document.getElementById('usrId').value = id || '';
+    var passField = document.getElementById('usrPassword');
+    if (id){
+      var u = USUARIOS_DB.find(function(x){ return x.id === id; });
+      if (!u) return;
+      document.getElementById('usrUsuario').value = u.usuario;
+      document.getElementById('usrNombre').value = u.nombre || '';
+      passField.value = '';
+      passField.placeholder = 'Dejar en blanco para no cambiar';
+      document.getElementById('usrRol').value = u.rol || 'auditor';
+      fillAuditorSelect(document.getElementById('usrAuditorId'), u.auditor_id);
+      document.getElementById('usrEstado').value = u.estado || 'Activo';
+    } else {
+      document.getElementById('usrUsuario').value = '';
+      document.getElementById('usrNombre').value = '';
+      passField.value = '';
+      passField.placeholder = 'Contraseña';
+      document.getElementById('usrRol').value = 'auditor';
+      fillAuditorSelect(document.getElementById('usrAuditorId'), null);
+      document.getElementById('usrEstado').value = 'Activo';
+    }
+    form.hidden = false;
+  }
+
+  document.getElementById('btnNuevoUsuario').addEventListener('click', function(){ openUsuarioForm(null); });
+  document.getElementById('btnCancelarUsuario').addEventListener('click', function(){ document.getElementById('formUsuario').hidden = true; });
+
+  document.getElementById('btnGuardarUsuario').addEventListener('click', function(){
+    var msg = document.getElementById('usrMsg'); msg.textContent = '';
+    var id = document.getElementById('usrId').value;
+    var usuario = document.getElementById('usrUsuario').value.trim();
+    var nombre = document.getElementById('usrNombre').value.trim();
+    var password = document.getElementById('usrPassword').value;
+    var rol = document.getElementById('usrRol').value;
+    var auditorId = document.getElementById('usrAuditorId').value;
+    var estado = document.getElementById('usrEstado').value;
+    if (!usuario){ msg.textContent = 'El usuario es obligatorio.'; return; }
+    if (!id && !password){ msg.textContent = 'La contraseña es obligatoria para un usuario nuevo.'; return; }
+    var payload = {
+      usuario: usuario,
+      nombre: nombre || null,
+      rol: rol,
+      auditor_id: auditorId ? parseInt(auditorId, 10) : null,
+      estado: estado
+    };
+    if (password) payload.password = password;
+    var q = id ? db.from('usuarios').update(payload).eq('id', id) : db.from('usuarios').insert(payload);
+    q.then(function(res){
+      if (res.error){ msg.textContent = 'Error al guardar: ' + res.error.message; return; }
+      document.getElementById('formUsuario').hidden = true;
+      loadUsuarios();
+    });
+  });
+
+  function eliminarUsuario(id){
+    if (!confirm('¿Eliminar este usuario?')) return;
+    db.from('usuarios').delete().eq('id', id).then(function(res){
+      if (res.error){ alert('Error al eliminar: ' + res.error.message); return; }
+      loadUsuarios();
+    });
+  }
+
+  // ---------- Actividades de cierre (grupos + actividades) ----------
+  function renderActividadesAdmin(){
+    var el = document.getElementById('actividadesAdminList');
+    if (!el) return;
+    var html = '';
+    GROUPS.forEach(function(g){
+      html += '<div class="subgroup-label"><span>' + g.name + '</span><span>' +
+        '<button type="button" class="icon-btn" data-edit-grupo="' + g.dbId + '" title="Editar grupo"><i class="ti ti-edit"></i></button> ' +
+        '<button type="button" class="icon-btn" data-del-grupo="' + g.dbId + '" title="Eliminar grupo"><i class="ti ti-trash"></i></button></span></div>';
+      html += '<table class="datatable"><tbody>';
+      g.activities.forEach(function(a){
+        html += '<tr><td>' + a.name + '</td><td style="color:var(--text3);font-size:11px;">' + a.id + '</td>' +
+          '<td style="text-align:right;"><button type="button" class="icon-btn" data-edit-actividad="' + a.dbId + '"><i class="ti ti-edit"></i></button> ' +
+          '<button type="button" class="icon-btn" data-del-actividad="' + a.dbId + '"><i class="ti ti-trash"></i></button></td></tr>';
+      });
+      if (!g.activities.length) html += '<tr><td colspan="3" style="color:var(--text3);">Sin actividades en este grupo.</td></tr>';
+      html += '</tbody></table>';
+    });
+    el.innerHTML = html || '<div style="padding:14px;color:var(--text3);">Sin grupos todavía.</div>';
+
+    el.querySelectorAll('[data-edit-grupo]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openGrupoForm(parseInt(btn.getAttribute('data-edit-grupo'), 10)); });
+    });
+    el.querySelectorAll('[data-del-grupo]').forEach(function(btn){
+      btn.addEventListener('click', function(){ eliminarGrupo(parseInt(btn.getAttribute('data-del-grupo'), 10)); });
+    });
+    el.querySelectorAll('[data-edit-actividad]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openActividadForm(parseInt(btn.getAttribute('data-edit-actividad'), 10)); });
+    });
+    el.querySelectorAll('[data-del-actividad]').forEach(function(btn){
+      btn.addEventListener('click', function(){ eliminarActividad(parseInt(btn.getAttribute('data-del-actividad'), 10)); });
+    });
+  }
+
+  function fillGrupoSelect(sel, selected){
+    var html = '';
+    GROUPS.forEach(function(g){ html += '<option value="' + g.dbId + '">' + g.name + '</option>'; });
+    sel.innerHTML = html;
+    if (selected != null) sel.value = String(selected);
+  }
+
+  function openGrupoForm(dbId){
+    document.getElementById('formActividad').hidden = true;
+    var form = document.getElementById('formGrupo');
+    document.getElementById('grpMsg').textContent = '';
+    document.getElementById('grpId').value = dbId || '';
+    if (dbId){
+      var g = GRUPOS_DB.find(function(x){ return x.id === dbId; });
+      if (!g) return;
+      document.getElementById('grpNombre').value = g.nombre;
+      document.getElementById('grpCodigo').value = g.codigo;
+      document.getElementById('grpOrden').value = g.orden || 0;
+    } else {
+      document.getElementById('grpNombre').value = '';
+      document.getElementById('grpCodigo').value = '';
+      var maxOrden = GRUPOS_DB.reduce(function(m,g){ return Math.max(m, g.orden||0); }, 0);
+      document.getElementById('grpOrden').value = maxOrden + 1;
+    }
+    form.hidden = false;
+  }
+
+  document.getElementById('btnNuevoGrupo').addEventListener('click', function(){ openGrupoForm(null); });
+  document.getElementById('btnCancelarGrupo').addEventListener('click', function(){ document.getElementById('formGrupo').hidden = true; });
+  document.getElementById('grpNombre').addEventListener('input', function(){
+    if (!document.getElementById('grpId').value){ document.getElementById('grpCodigo').value = slugify(this.value); }
+  });
+
+  document.getElementById('btnGuardarGrupo').addEventListener('click', function(){
+    var msg = document.getElementById('grpMsg'); msg.textContent = '';
+    var id = document.getElementById('grpId').value ? parseInt(document.getElementById('grpId').value, 10) : null;
+    var nombre = document.getElementById('grpNombre').value.trim();
+    var codigo = slugify(document.getElementById('grpCodigo').value.trim() || nombre);
+    var orden = parseInt(document.getElementById('grpOrden').value, 10) || 0;
+    if (!nombre){ msg.textContent = 'El nombre es obligatorio.'; return; }
+    db.rpc('admin_guardar_grupo', { p_usuario: sessionUsuario, p_password: sessionPassword, p_id: id, p_codigo: codigo, p_nombre: nombre, p_orden: orden }).then(function(res){
+      if (res.error){ msg.textContent = 'Error al guardar: ' + res.error.message; return; }
+      document.getElementById('formGrupo').hidden = true;
+      loadCierreConfig();
+    });
+  });
+
+  function eliminarGrupo(id){
+    if (!confirm('¿Eliminar este grupo y todas sus actividades?')) return;
+    db.rpc('admin_eliminar_grupo', { p_usuario: sessionUsuario, p_password: sessionPassword, p_id: id }).then(function(res){
+      if (res.error){ alert('Error al eliminar: ' + res.error.message); return; }
+      loadCierreConfig();
+    });
+  }
+
+  function openActividadForm(dbId){
+    document.getElementById('formGrupo').hidden = true;
+    var form = document.getElementById('formActividad');
+    document.getElementById('actMsg').textContent = '';
+    document.getElementById('actId').value = dbId || '';
+    if (dbId){
+      var a = ACTIVIDADES_DB.find(function(x){ return x.id === dbId; });
+      if (!a) return;
+      fillGrupoSelect(document.getElementById('actGrupoId'), a.grupo_id);
+      document.getElementById('actNombre').value = a.nombre;
+      document.getElementById('actCodigo').value = a.codigo;
+      document.getElementById('actOrden').value = a.orden || 0;
+    } else {
+      fillGrupoSelect(document.getElementById('actGrupoId'), null);
+      document.getElementById('actNombre').value = '';
+      document.getElementById('actCodigo').value = '';
+      document.getElementById('actOrden').value = 0;
+    }
+    form.hidden = false;
+  }
+
+  document.getElementById('btnNuevaActividad').addEventListener('click', function(){ openActividadForm(null); });
+  document.getElementById('btnCancelarActividad').addEventListener('click', function(){ document.getElementById('formActividad').hidden = true; });
+  document.getElementById('actNombre').addEventListener('input', function(){
+    if (!document.getElementById('actId').value){ document.getElementById('actCodigo').value = slugify(this.value); }
+  });
+
+  document.getElementById('btnGuardarActividad').addEventListener('click', function(){
+    var msg = document.getElementById('actMsg'); msg.textContent = '';
+    var id = document.getElementById('actId').value ? parseInt(document.getElementById('actId').value, 10) : null;
+    var grupoId = parseInt(document.getElementById('actGrupoId').value, 10);
+    var nombre = document.getElementById('actNombre').value.trim();
+    var codigo = slugify(document.getElementById('actCodigo').value.trim() || nombre);
+    var orden = parseInt(document.getElementById('actOrden').value, 10) || 0;
+    if (!nombre){ msg.textContent = 'El nombre es obligatorio.'; return; }
+    if (!grupoId){ msg.textContent = 'Selecciona un grupo.'; return; }
+    db.rpc('admin_guardar_actividad', { p_usuario: sessionUsuario, p_password: sessionPassword, p_id: id, p_codigo: codigo, p_grupo_id: grupoId, p_nombre: nombre, p_orden: orden }).then(function(res){
+      if (res.error){ msg.textContent = 'Error al guardar: ' + res.error.message; return; }
+      document.getElementById('formActividad').hidden = true;
+      loadCierreConfig();
+    });
+  });
+
+  function eliminarActividad(id){
+    if (!confirm('¿Eliminar esta actividad?')) return;
+    db.rpc('admin_eliminar_actividad', { p_usuario: sessionUsuario, p_password: sessionPassword, p_id: id }).then(function(res){
+      if (res.error){ alert('Error al eliminar: ' + res.error.message); return; }
+      loadCierreConfig();
+    });
+  }
+
+  // ---------- Empresas a revisar ----------
+  function renderEmpresasAdmin(){
+    var tbody = document.getElementById('empresasTbody');
+    if (!tbody) return;
+    var html = '';
+    EMPRESAS_DB.slice().sort(function(a,b){ return (a.pais_id-b.pais_id) || (a.orden-b.orden); }).forEach(function(e){
+      var pais = PAISES_DB.find(function(p){ return p.id === e.pais_id; });
+      html += '<tr><td>' + (pais ? pais.nombre : '—') + '</td><td>' + e.nombre + '</td>' +
+        '<td style="color:var(--text3);font-size:11px;">' + e.codigo + '</td>' +
+        '<td><span class="pill ' + (e.estado === 'Activo' ? 'ok' : 'muted') + '">' + e.estado + '</span></td>' +
+        '<td><button type="button" class="icon-btn" data-edit-empresa="' + e.id + '"><i class="ti ti-edit"></i></button> ' +
+          '<button type="button" class="icon-btn" data-del-empresa="' + e.id + '"><i class="ti ti-trash"></i></button></td></tr>';
+    });
+    tbody.innerHTML = html || '<tr><td colspan="5" style="color:var(--text3);">Sin empresas.</td></tr>';
+    tbody.querySelectorAll('[data-edit-empresa]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openEmpresaForm(parseInt(btn.getAttribute('data-edit-empresa'), 10)); });
+    });
+    tbody.querySelectorAll('[data-del-empresa]').forEach(function(btn){
+      btn.addEventListener('click', function(){ eliminarEmpresa(parseInt(btn.getAttribute('data-del-empresa'), 10)); });
+    });
+  }
+
+  function fillPaisSelect(sel, selected){
+    var html = '';
+    PAISES_DB.forEach(function(p){ html += '<option value="' + p.id + '">' + p.nombre + '</option>'; });
+    sel.innerHTML = html;
+    if (selected != null) sel.value = String(selected);
+  }
+
+  function openEmpresaForm(dbId){
+    var form = document.getElementById('formEmpresa');
+    document.getElementById('empMsg').textContent = '';
+    document.getElementById('empId').value = dbId || '';
+    if (dbId){
+      var e = EMPRESAS_DB.find(function(x){ return x.id === dbId; });
+      if (!e) return;
+      fillPaisSelect(document.getElementById('empPaisId'), e.pais_id);
+      document.getElementById('empNombre').value = e.nombre;
+      document.getElementById('empCodigo').value = e.codigo;
+      document.getElementById('empOrden').value = e.orden || 0;
+      document.getElementById('empEstado').value = e.estado || 'Activo';
+    } else {
+      fillPaisSelect(document.getElementById('empPaisId'), null);
+      document.getElementById('empNombre').value = '';
+      document.getElementById('empCodigo').value = '';
+      document.getElementById('empOrden').value = 0;
+      document.getElementById('empEstado').value = 'Activo';
+    }
+    form.hidden = false;
+  }
+
+  document.getElementById('btnNuevaEmpresa').addEventListener('click', function(){ openEmpresaForm(null); });
+  document.getElementById('btnCancelarEmpresa').addEventListener('click', function(){ document.getElementById('formEmpresa').hidden = true; });
+  document.getElementById('empNombre').addEventListener('input', function(){
+    if (!document.getElementById('empId').value){ document.getElementById('empCodigo').value = slugify(this.value); }
+  });
+
+  document.getElementById('btnGuardarEmpresa').addEventListener('click', function(){
+    var msg = document.getElementById('empMsg'); msg.textContent = '';
+    var id = document.getElementById('empId').value ? parseInt(document.getElementById('empId').value, 10) : null;
+    var paisId = parseInt(document.getElementById('empPaisId').value, 10);
+    var nombre = document.getElementById('empNombre').value.trim();
+    var codigo = slugify(document.getElementById('empCodigo').value.trim() || (paisId + '-' + nombre));
+    var orden = parseInt(document.getElementById('empOrden').value, 10) || 0;
+    var estado = document.getElementById('empEstado').value;
+    if (!nombre){ msg.textContent = 'El nombre es obligatorio.'; return; }
+    if (!paisId){ msg.textContent = 'Selecciona un país.'; return; }
+    db.rpc('admin_guardar_empresa', { p_usuario: sessionUsuario, p_password: sessionPassword, p_id: id, p_codigo: codigo, p_pais_id: paisId, p_nombre: nombre, p_orden: orden, p_estado: estado }).then(function(res){
+      if (res.error){ msg.textContent = 'Error al guardar: ' + res.error.message; return; }
+      document.getElementById('formEmpresa').hidden = true;
+      loadCierreConfig();
+    });
+  });
+
+  function eliminarEmpresa(id){
+    if (!confirm('¿Eliminar esta empresa?')) return;
+    db.rpc('admin_eliminar_empresa', { p_usuario: sessionUsuario, p_password: sessionPassword, p_id: id }).then(function(res){
+      if (res.error){ alert('Error al eliminar: ' + res.error.message); return; }
+      loadCierreConfig();
+    });
+  }
 
   // ---------------------------------------------------------------
   // Login (same mechanism as Kielsa CI: usuarios.usuario + password,
@@ -987,6 +1499,7 @@ select#monthSelect{
       roleEl.textContent = currentUser.rol === 'admin' ? 'Administrador' : 'Solo lectura';
     }
     document.getElementById('toggleNewMonth').hidden = !isAdmin();
+    document.getElementById('navAdmin').style.display = isAdmin() ? '' : 'none';
   }
 
   function enterApp(){
@@ -1037,7 +1550,7 @@ select#monthSelect{
       sessionPassword = password;
       currentAuditor = resolveAuditor(currentUser);
       applyUserUI();
-      enterApp();
+      if (directoryReady){ enterApp(); } else { pendingEnter = true; }
     }).finally(function(){
       authSubmit.disabled = false;
       authSubmitText.textContent = 'Entrar';
@@ -1047,17 +1560,19 @@ select#monthSelect{
   document.getElementById('btnLogout').addEventListener('click', exitApp);
 
   // ---------------------------------------------------------------
-  // Boot: init Supabase, render skeleton, load directory.
+  // Boot: init Supabase, load configuración (países/actividades/
+  // empresas) y renderizar el checklist en cuanto esos datos llegan.
   // ---------------------------------------------------------------
-  renderMatrixSkeleton();
   ensureMonthOption('2026-09', true);
   var thisMonth = currentMonthId();
   if (thisMonth !== '2026-09') ensureMonthOption(thisMonth, false);
-  renderAll();
 
   try{
     db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    loadDirectory();
+    loadDirectory().then(function(){
+      directoryReady = true;
+      if (pendingEnter){ pendingEnter = false; enterApp(); }
+    });
   } catch(e){
     console.error('supabase init failed', e);
     showAuthError('No se pudo conectar con el servidor. Revisa tu conexión a internet.');
