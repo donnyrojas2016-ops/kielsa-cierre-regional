@@ -349,6 +349,26 @@ select#monthSelect{
 }
 .icon-btn{ background:transparent; border:none; cursor:pointer; color:var(--text3); font-size:14px; padding:2px 4px; }
 .icon-btn:hover{ color:var(--danger); }
+
+/* ---------- checklist independiente por auditor y país ---------- */
+.summary-group{ margin-bottom:18px; }
+.summary-group-title{
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--text3); margin-bottom:8px;
+}
+.panel-head .auditor-picker{
+  font-family:inherit; font-size:12px; color:var(--text); background:#fff;
+  border:1px solid var(--border2); border-radius:8px; padding:.3rem .5rem;
+}
+.panel-updated{ font-size:11px; color:var(--text3); white-space:nowrap; }
+.panel-obs{
+  padding:14px 16px; border-top:1px solid var(--border); background:var(--grayBg);
+}
+.panel-obs label{
+  display:block; font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--text3); margin-bottom:8px;
+}
+.panel-obs textarea:disabled{ opacity:.7; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -433,23 +453,16 @@ select#monthSelect{
       <div id="checklistView">
         <div id="matrixContainer"></div>
 
-        <section class="footer-grid">
-          <div class="note-card">
-            <div class="legend" style="margin-bottom:10px;">
-              <span class="legend-item"><span class="legend-swatch si"></span>S&iacute; &mdash; completado</span>
-              <span class="legend-item"><span class="legend-swatch no"></span>No &mdash; pendiente de cerrar</span>
-              <span class="legend-item"><span class="legend-swatch en_proceso"></span>En proceso</span>
-              <span class="legend-item"><span class="legend-swatch no_revisado"></span>No revisado</span>
-            </div>
-            <div>Selecciona el estado de cada actividad desde la lista desplegable de cada celda.</div>
-            <div style="margin-top:8px;"><b>Fecha l&iacute;mite de publicaci&oacute;n:</b> d&iacute;a 6 de cada mes, hasta finalizar el proceso de cierre regional.</div>
+        <div class="note-card" style="margin-bottom:16px;">
+          <div class="legend" style="margin-bottom:10px;">
+            <span class="legend-item"><span class="legend-swatch si"></span>S&iacute; &mdash; completado</span>
+            <span class="legend-item"><span class="legend-swatch no"></span>No &mdash; pendiente de cerrar</span>
+            <span class="legend-item"><span class="legend-swatch en_proceso"></span>En proceso</span>
+            <span class="legend-item"><span class="legend-swatch no_revisado"></span>No revisado</span>
           </div>
-          <div class="obs-card">
-            <label for="obsInput">Observaciones del mes</label>
-            <textarea id="obsInput" placeholder="Notas del equipo regional sobre el cierre de este mes&hellip;"></textarea>
-            <div class="save-hint" id="obsHint"></div>
-          </div>
-        </section>
+          <div>Selecciona el estado de cada actividad desde la lista desplegable de cada celda. Cada auditor tiene su propio checklist independiente por pa&iacute;s; las observaciones de cada panel se guardan junto con ese checklist.</div>
+          <div style="margin-top:8px;"><b>Fecha l&iacute;mite de publicaci&oacute;n:</b> d&iacute;a 6 de cada mes, hasta finalizar el proceso de cierre regional.</div>
+        </div>
       </div>
 
       <div id="reportView" hidden>
@@ -542,8 +555,8 @@ select#monthSelect{
       </div>
 
       <div class="meta-row">
-        <span id="lastUpdated">&nbsp;</span>
-        <span>Datos compartidos en tiempo real entre todo el equipo regional.</span>
+        <span>Cada auditor tiene su propio checklist independiente por pa&iacute;s.</span>
+        <span>Los cambios se guardan y sincronizan en tiempo real.</span>
       </div>
 
     </main>
@@ -622,42 +635,11 @@ select#monthSelect{
 
   function key(actId, coId){ return actId + '__' + coId; }
 
-  // Seed data reflecting September 2026, as provided in the source file.
-  function buildSeed(){
-    var s = {};
-    ACTIVITIES.forEach(function(a){
-      COMPANIES.forEach(function(co){ s[key(a.id, co.id)] = 'no_revisado'; });
-    });
-    var siGroupAll = ['cxp','cxc','bancos','concbancarias'];
-    var noGroupAll = ['concxc','concxp','conbancos','coninventario','cierrecontable','audfarinter','audkielsa','integracionbalance'];
-    var reportingCompanies = COMPANIES.filter(function(co){ return co.id!=='gt-herdez' && co.id!=='gt-moderna'; });
-
-    siGroupAll.forEach(function(actId){
-      reportingCompanies.forEach(function(co){ s[key(actId, co.id)] = 'si'; });
-    });
-    noGroupAll.forEach(function(actId){
-      reportingCompanies.forEach(function(co){ s[key(actId, co.id)] = 'no'; });
-    });
-    ['inventario','tipocambio'].forEach(function(actId){
-      ['hn-fundacion','hn-nextfin','hn-kielsa','sv-moraleslopez','sv-netxfin'].forEach(function(coId){
-        s[key(actId, coId)] = 'si';
-      });
-    });
-    reportingCompanies.forEach(function(co){
-      s[key('activosfijos', co.id)] = (co.id==='hn-fundacion' || co.id==='hn-nextfin') ? 'no_revisado' : 'si';
-    });
-    return s;
-  }
-
   // ---------------------------------------------------------------
   // State
   // ---------------------------------------------------------------
   var db = null;
   var currentMonth = null;
-  var unsub = null;
-  var docState = { statuses:{}, notes:'', updatedAt:null };
-  var obsSaveTimer = null;
-  var obsDirty = false;
   var ready = false;
   var directoryReady = false;  // true once países/actividades/empresas ya cargaron
   var pendingEnter = false;    // true si el login terminó antes de que directoryReady
@@ -665,16 +647,28 @@ select#monthSelect{
   var currentUser = null;      // usuarios row (no password) returned by login_usuario
   var sessionUsuario = null;   // kept in memory only, needed to re-authorize each write
   var sessionPassword = null;  // kept in memory only, never persisted
-  var currentAuditor = null;   // { name, countries } resolved for the signed-in usuario, or null
+  var currentAuditor = null;   // { name, countries, auditorId } resolved for the signed-in usuario, or null
+
+  // Cada auditor tiene su propio checklist independiente por país. Estos
+  // mapas viven por país (country.id, ej. 'hn') y guardan, para el mes
+  // actual, el documento (statuses/notes) que corresponde según el modo:
+  //  - modo personal (currentAuditor.auditorId != null): siempre su propio
+  //    checklist, para cada país que tenga asignado.
+  //  - modo consulta / oversight (rol=admin puro, sin auditor propio):
+  //    de solo lectura, eligiendo con un selector qué auditor ver por país.
+  var docStates = {};      // country.id -> { statuses, notes, updatedAt, auditorId } | null
+  var docChannels = {};    // country.id -> supabase realtime channel
+  var oversightAuditor = {}; // country.id -> auditor_id elegido en modo consulta
+  var obsSaveTimers = {};  // country.id -> setTimeout handle
 
   function resolveAuditor(u){
     if (!u) return null;
-    if (u.rol === 'admin') return { name: u.nombre, countries: ALL_COUNTRY_IDS.slice() };
+    if (u.rol === 'admin') return { name: u.nombre, countries: ALL_COUNTRY_IDS.slice(), auditorId: null };
     function fromAuditorRow(a){
       var countries = (a.pais_ids || [])
         .map(function(pid){ return PAIS_ID_TO_CODE[pid]; })
         .filter(function(cid){ return cid && ALL_COUNTRY_IDS.indexOf(cid) !== -1; });
-      return { name: a.nombre || u.nombre, countries: countries };
+      return { name: a.nombre || u.nombre, countries: countries, auditorId: a.id };
     }
     if (u.auditor_id != null){
       var a = AUDITORES.find(function(x){ return x.id === u.auditor_id; });
@@ -686,21 +680,32 @@ select#monthSelect{
     return null;
   }
 
-  function canEditCompany(companyId){
-    if (!currentAuditor) return false;
-    var co = COMPANY_BY_ID[companyId];
-    return !!co && currentAuditor.countries.indexOf(co.countryId) !== -1;
+  // "Modo consulta": usuarios rol=admin sin un auditor propio vinculado.
+  // Pueden ver (solo lectura) el checklist de cualquier auditor, país por
+  // país, pero no tienen un checklist personal que editar.
+  function isOversight(){
+    return !!currentAuditor && currentAuditor.auditorId == null;
   }
   function isAdmin(){
     return !!currentAuditor && currentAuditor.countries.length >= ALL_COUNTRY_IDS.length;
+  }
+  function canEditCountry(countryId){
+    return !!currentAuditor && currentAuditor.auditorId != null && currentAuditor.countries.indexOf(countryId) !== -1;
+  }
+  function auditorsForCountry(c){
+    return AUDITORES.filter(function(a){ return a.estado === 'Activo' && (a.pais_ids || []).indexOf(c.dbId) !== -1; });
+  }
+  // Países que corresponden mostrar en la pantalla de Checklist según el
+  // modo: propios (modo personal) o todos (modo consulta, con selector).
+  function activeCountries(){
+    if (!currentAuditor) return [];
+    if (isOversight()) return COUNTRIES;
+    return COUNTRIES.filter(function(c){ return currentAuditor.countries.indexOf(c.id) !== -1; });
   }
 
   var monthSelect = document.getElementById('monthSelect');
   var syncText = document.getElementById('syncText');
   var syncIndicator = document.getElementById('syncIndicator');
-  var lastUpdatedEl = document.getElementById('lastUpdated');
-  var obsInput = document.getElementById('obsInput');
-  var obsHint = document.getElementById('obsHint');
 
   function monthLabel(id){
     var parts = id.split('-');
@@ -732,24 +737,6 @@ select#monthSelect{
   // ---------------------------------------------------------------
   // Rendering: checklist matrix
   // ---------------------------------------------------------------
-  function computeStats(statuses){
-    function scope(companies){
-      var si=0,no=0,proceso=0,noRev=0;
-      ACTIVITIES.forEach(function(a){
-        companies.forEach(function(co){
-          var v = statuses[key(a.id, co.id)] || 'no_revisado';
-          if (v==='si') si++; else if (v==='no') no++; else if (v==='en_proceso') proceso++; else noRev++;
-        });
-      });
-      var total = si+no+proceso+noRev;
-      var pct = total ? Math.round(si/total*100) : null;
-      return { si:si, no:no, proceso:proceso, noRev:noRev, total:total, pct:pct };
-    }
-    var global = scope(COMPANIES);
-    var byCountry = COUNTRIES.map(function(c){ return { id:c.id, name:c.name, stats: scope(c.companies) }; });
-    return { global:global, byCountry:byCountry };
-  }
-
   function pctColor(pct){
     if (pct===null) return 'var(--text3)';
     if (pct>=90) return 'var(--success)';
@@ -757,30 +744,90 @@ select#monthSelect{
     return 'var(--danger)';
   }
 
-  function renderSummary(statuses){
-    var stats = computeStats(statuses);
-    var el = document.getElementById('summaryTiles');
-    var html = '';
-
-    var g = stats.global;
-    html += '<div class="tile global">' +
-      '<div class="tile-label">Cumplimiento regional</div>' +
-      '<div class="tile-pct num" style="color:' + pctColor(g.pct) + '">' + (g.pct===null? '—' : g.pct+'%') + '</div>' +
-      '<div class="tile-count num">' + g.si + ' de ' + g.total + ' actividades completadas' + (g.proceso? ' · ' + g.proceso + ' en proceso' : '') + '</div>' +
-      barHtml(g) +
-      '</div>';
-
-    stats.byCountry.forEach(function(c){
-      var s = c.stats;
-      html += '<div class="tile">' +
-        '<div class="tile-label">' + c.name + '</div>' +
-        '<div class="tile-pct num" style="color:' + pctColor(s.pct) + '">' + (s.pct===null? '—' : s.pct+'%') + '</div>' +
-        '<div class="tile-count num">' + s.si + '/' + s.total + ' completadas' + (s.proceso? ' · ' + s.proceso + ' en proceso' : '') + '</div>' +
-        barHtml(s) +
-        '</div>';
+  // Reporte: cada país puede tener varios auditores, cada uno con su
+  // propio checklist independiente. "Slots" son los pares (país, auditor)
+  // que deberían existir según las asignaciones actuales — así el
+  // porcentaje refleja también lo que un auditor todavía no ha empezado,
+  // no solo lo que ya tiene guardado.
+  function buildExpectedSlots(){
+    var slots = [];
+    COUNTRIES.forEach(function(c){
+      auditorsForCountry(c).forEach(function(a){ slots.push({ pais: c, auditorId: a.id }); });
     });
+    return slots;
+  }
 
-    el.innerHTML = html;
+  function statsForSlots(slots, rowsMap){
+    var si=0,no=0,proceso=0,noRev=0;
+    slots.forEach(function(s){
+      var statuses = rowsMap[s.pais.dbId + '_' + s.auditorId] || {};
+      ACTIVITIES.forEach(function(a){
+        s.pais.companies.forEach(function(co){
+          var v = statuses[key(a.id, co.id)] || 'no_revisado';
+          if (v==='si') si++; else if (v==='no') no++; else if (v==='en_proceso') proceso++; else noRev++;
+        });
+      });
+    });
+    var total = si+no+proceso+noRev;
+    var pct = total ? Math.round(si/total*100) : null;
+    return { si:si, no:no, proceso:proceso, noRev:noRev, total:total, pct:pct };
+  }
+
+  function tileHtml(label, s){
+    return '<div class="tile">' +
+      '<div class="tile-label">' + label + '</div>' +
+      '<div class="tile-pct num" style="color:' + pctColor(s.pct) + '">' + (s.pct===null? '—' : s.pct+'%') + '</div>' +
+      '<div class="tile-count num">' + s.si + '/' + s.total + ' completadas' + (s.proceso? ' · ' + s.proceso + ' en proceso' : '') + '</div>' +
+      barHtml(s) +
+      '</div>';
+  }
+
+  function loadAndRenderSummary(){
+    var el = document.getElementById('summaryTiles');
+    if (!db || !currentMonth){ el.innerHTML = ''; return; }
+    el.innerHTML = '<div style="padding:20px;color:var(--text3);">Cargando resumen…</div>';
+    db.from('cierre_regional_estados').select('pais_id,auditor_id,statuses')
+      .eq('mes', currentMonth).not('auditor_id', 'is', null).not('pais_id', 'is', null)
+      .then(function(res){
+        if (res.error){
+          el.innerHTML = '<div style="padding:20px;color:var(--danger);">No se pudo cargar el resumen.</div>';
+          return;
+        }
+        var rowsMap = {};
+        (res.data || []).forEach(function(r){ rowsMap[r.pais_id + '_' + r.auditor_id] = r.statuses || {}; });
+
+        var slots = buildExpectedSlots();
+        var global = statsForSlots(slots, rowsMap);
+        var byPais = COUNTRIES.map(function(c){
+          return { name: c.name, stats: statsForSlots(slots.filter(function(s){ return s.pais.id === c.id; }), rowsMap) };
+        });
+        var byAuditor = AUDITORES.filter(function(a){ return a.estado === 'Activo'; }).map(function(a){
+          return { name: a.nombre, stats: statsForSlots(slots.filter(function(s){ return s.auditorId === a.id; }), rowsMap) };
+        }).filter(function(x){ return x.stats.total > 0; });
+
+        var html = '';
+        html += '<div class="summary-group"><div class="summary-group-title">Global</div><div class="summary">';
+        html += '<div class="tile global">' +
+          '<div class="tile-label">Cumplimiento regional</div>' +
+          '<div class="tile-pct num" style="color:' + pctColor(global.pct) + '">' + (global.pct===null? '—' : global.pct+'%') + '</div>' +
+          '<div class="tile-count num">' + global.si + ' de ' + global.total + ' actividades completadas' + (global.proceso? ' · ' + global.proceso + ' en proceso' : '') + '</div>' +
+          barHtml(global) + '</div>';
+        html += '</div></div>';
+
+        html += '<div class="summary-group"><div class="summary-group-title">Por país</div><div class="summary">';
+        byPais.forEach(function(c){ html += tileHtml(c.name, c.stats); });
+        html += '</div></div>';
+
+        html += '<div class="summary-group"><div class="summary-group-title">Por auditor</div><div class="summary">';
+        if (!byAuditor.length){
+          html += '<div style="padding:14px;color:var(--text3);">Aún no hay actividad registrada por auditor este mes.</div>';
+        } else {
+          byAuditor.forEach(function(a){ html += tileHtml(a.name, a.stats); });
+        }
+        html += '</div></div>';
+
+        el.innerHTML = html;
+      });
   }
 
   function barHtml(s){
@@ -795,65 +842,11 @@ select#monthSelect{
       '</div>';
   }
 
-  // One independent panel + table per country, instead of a single wide
-  // table with every country's companies crammed side by side.
-  function renderMatrixSkeleton(){
-    var container = document.getElementById('matrixContainer');
-    var html = '';
-
-    COUNTRIES.forEach(function(c){
-      html += '<section class="panel country-panel" data-country="' + c.id + '">' +
-        '<div class="panel-head">' +
-          '<div class="left"><i class="ti ti-map-pin"></i><span>' + c.name + '</span>' +
-          '<span class="count">&middot; ' + c.companies.length + ' ' + (c.companies.length===1?'empresa':'empresas') + '</span></div>' +
-        '</div>' +
-        '<div class="matrix-scroll"><table class="matrix" aria-label="Matriz de cierre · ' + c.name + '">';
-
-      html += '<thead><tr class="company-row"><th class="corner">Actividad de cierre</th>';
-      c.companies.forEach(function(co){ html += '<th>' + co.name + '</th>'; });
-      html += '</tr></thead><tbody>';
-
-      GROUPS.forEach(function(g){
-        html += '<tr class="group-row"><th colspan="' + (c.companies.length+1) + '">' + g.name + '</th></tr>';
-        g.activities.forEach(function(a){
-          html += '<tr class="activity-row" data-activity="' + a.id + '">';
-          html += '<td class="actname">' + a.name + '</td>';
-          c.companies.forEach(function(co){
-            html += '<td class="cell-wrap" data-company="' + co.id + '">' +
-              '<select class="cell" data-key="' + key(a.id, co.id) + '" aria-label="' + a.name + ' · ' + co.name + '">' +
-                '<option value="no_revisado">No revisado</option>' +
-                '<option value="si">Sí</option>' +
-                '<option value="no">No</option>' +
-                '<option value="en_proceso">En proceso</option>' +
-              '</select></td>';
-          });
-          html += '</tr>';
-        });
-      });
-      html += '</tbody></table></div></section>';
-    });
-
-    container.innerHTML = html;
-
-    container.querySelectorAll('select.cell').forEach(function(sel){
-      sel.addEventListener('change', function(){ setCell(sel.getAttribute('data-key'), sel.value); });
-    });
-  }
-
-  function renderCells(statuses){
-    var container = document.getElementById('matrixContainer');
-    container.querySelectorAll('select.cell').forEach(function(sel){
-      var k = sel.getAttribute('data-key');
-      var companyId = sel.closest('td') ? sel.closest('td').getAttribute('data-company') : null;
-      var v = statuses[k] || 'no_revisado';
-      sel.value = v;
-      sel.className = 'cell ' + v;
-      var editable = ready && canEditCompany(companyId);
-      sel.disabled = !editable;
-      sel.title = editable ? '' : 'Solo lectura: fuera de tu país asignado';
-    });
-  }
-
+  // Un panel + tabla independiente por país. En modo personal solo se
+  // muestran los países asignados al auditor (siempre editable, siempre
+  // su propio checklist). En modo consulta (rol=admin sin auditor propio)
+  // se muestran todos los países, de solo lectura, con un selector para
+  // elegir de qué auditor ver el checklist.
   function fmtTimestamp(iso){
     if (!iso) return 'Sin cambios registrados todavía.';
     var d = new Date(iso);
@@ -861,11 +854,147 @@ select#monthSelect{
       ' · ' + d.toLocaleTimeString('es-HN', { hour:'2-digit', minute:'2-digit' });
   }
 
-  function renderAll(){
-    renderSummary(docState.statuses);
-    renderCells(docState.statuses);
-    lastUpdatedEl.textContent = fmtTimestamp(docState.updatedAt);
-    if (obsInput !== document.activeElement){ obsInput.value = docState.notes || ''; }
+  function renderMatrixSkeleton(){
+    var container = document.getElementById('matrixContainer');
+
+    if (!currentAuditor){
+      container.innerHTML = '<div class="panel" style="padding:24px;color:var(--text3);">No tienes un auditor o país asignado para el checklist. Contacta al administrador.</div>';
+      return;
+    }
+
+    var countries = activeCountries();
+    if (!countries.length){
+      container.innerHTML = '<div class="panel" style="padding:24px;color:var(--text3);">No tienes países asignados todavía.</div>';
+      return;
+    }
+
+    var html = '';
+    countries.forEach(function(c){
+      var auditors = isOversight() ? auditorsForCountry(c) : null;
+      var noAuditors = isOversight() && auditors.length === 0;
+      if (isOversight() && !noAuditors && oversightAuditor[c.id] == null){
+        oversightAuditor[c.id] = auditors[0].id;
+      }
+
+      html += '<section class="panel country-panel" data-country-panel="' + c.id + '">' +
+        '<div class="panel-head">' +
+          '<div class="left"><i class="ti ti-map-pin"></i><span>' + c.name + '</span>' +
+          '<span class="count">&middot; ' + c.companies.length + ' ' + (c.companies.length===1?'empresa':'empresas') + '</span></div>' +
+          '<div class="right">';
+      if (isOversight() && !noAuditors){
+        html += '<select class="auditor-picker" data-country="' + c.id + '" aria-label="Auditor · ' + c.name + '">';
+        auditors.forEach(function(a){
+          html += '<option value="' + a.id + '"' + (oversightAuditor[c.id]===a.id ? ' selected' : '') + '>' + a.nombre + '</option>';
+        });
+        html += '</select>';
+      }
+      html += '<span class="panel-updated" data-country="' + c.id + '"></span>' +
+          '</div>' +
+        '</div>';
+
+      if (noAuditors){
+        html += '<div style="padding:20px;color:var(--text3);">Sin auditores asignados a este país.</div>';
+      } else {
+        html += '<div class="matrix-scroll"><table class="matrix" aria-label="Matriz de cierre · ' + c.name + '">';
+        html += '<thead><tr class="company-row"><th class="corner">Actividad de cierre</th>';
+        c.companies.forEach(function(co){ html += '<th>' + co.name + '</th>'; });
+        html += '</tr></thead><tbody>';
+
+        GROUPS.forEach(function(g){
+          html += '<tr class="group-row"><th colspan="' + (c.companies.length+1) + '">' + g.name + '</th></tr>';
+          g.activities.forEach(function(a){
+            html += '<tr class="activity-row" data-activity="' + a.id + '">';
+            html += '<td class="actname">' + a.name + '</td>';
+            c.companies.forEach(function(co){
+              html += '<td class="cell-wrap" data-company="' + co.id + '">' +
+                '<select class="cell" data-key="' + key(a.id, co.id) + '" aria-label="' + a.name + ' · ' + co.name + '">' +
+                  '<option value="no_revisado">No revisado</option>' +
+                  '<option value="si">Sí</option>' +
+                  '<option value="no">No</option>' +
+                  '<option value="en_proceso">En proceso</option>' +
+                '</select></td>';
+            });
+            html += '</tr>';
+          });
+        });
+        html += '</tbody></table></div>';
+
+        html += '<div class="panel-obs">' +
+          '<label>Observaciones &middot; ' + c.name + '</label>' +
+          '<textarea class="obs-input" data-country="' + c.id + '" placeholder="Notas de ' + c.name + ' para este mes…"></textarea>' +
+          '<div class="save-hint" data-country="' + c.id + '"></div>' +
+          '</div>';
+      }
+
+      html += '</section>';
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('select.cell').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var panel = sel.closest('[data-country-panel]');
+        var countryId = panel ? panel.getAttribute('data-country-panel') : null;
+        if (countryId) setCell(countryId, sel.getAttribute('data-key'), sel.value);
+      });
+    });
+
+    container.querySelectorAll('textarea.obs-input').forEach(function(ta){
+      var countryId = ta.getAttribute('data-country');
+      ta.addEventListener('input', function(){
+        var st = docStates[countryId];
+        if (!st) return;
+        st.notes = ta.value;
+        var hint = container.querySelector('.save-hint[data-country="' + countryId + '"]');
+        if (hint) hint.textContent = 'Escribiendo…';
+        clearTimeout(obsSaveTimers[countryId]);
+        obsSaveTimers[countryId] = setTimeout(function(){
+          writeDocFor(countryId);
+          if (hint) hint.textContent = 'Guardado';
+          setTimeout(function(){ if (hint) hint.textContent = ''; }, 1500);
+        }, 800);
+      });
+      ta.addEventListener('blur', function(){
+        clearTimeout(obsSaveTimers[countryId]);
+        writeDocFor(countryId);
+      });
+    });
+
+    container.querySelectorAll('select.auditor-picker').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var countryId = sel.getAttribute('data-country');
+        oversightAuditor[countryId] = sel.value ? parseInt(sel.value, 10) : null;
+        var c = COUNTRIES.find(function(x){ return x.id === countryId; });
+        if (docChannels[countryId]) { docChannels[countryId].unsubscribe(); delete docChannels[countryId]; }
+        if (c) loadCountryDoc(c);
+      });
+    });
+  }
+
+  function renderCountryCells(c){
+    var panel = document.querySelector('[data-country-panel="' + c.id + '"]');
+    if (!panel) return;
+    var st = docStates[c.id];
+    var statuses = (st && st.statuses) || {};
+    var editable = ready && !!st && canEditCountry(c.id);
+
+    panel.querySelectorAll('select.cell').forEach(function(sel){
+      var k = sel.getAttribute('data-key');
+      var v = statuses[k] || 'no_revisado';
+      sel.value = v;
+      sel.className = 'cell ' + v;
+      sel.disabled = !editable;
+      sel.title = editable ? '' : (isOversight() ? 'Modo consulta: solo lectura' : '');
+    });
+
+    var ta = panel.querySelector('textarea.obs-input');
+    if (ta){
+      if (ta !== document.activeElement){ ta.value = (st && st.notes) || ''; }
+      ta.disabled = !editable;
+    }
+
+    var upd = panel.querySelector('.panel-updated');
+    if (upd){ upd.textContent = st ? fmtTimestamp(st.updatedAt) : (isOversight() ? 'Selecciona un auditor' : ''); }
   }
 
   // ---------------------------------------------------------------
@@ -873,17 +1002,22 @@ select#monthSelect{
   // as Kielsa CI's other tables). Writes go through the
   // "guardar_cierre_estado" RPC, which re-checks usuario+password
   // server-side before saving — the table itself has no anon write
-  // policy, so this is the only path in.
+  // policy, so this is the only path in. Cada fila corresponde a un
+  // (mes, auditor, país) — checklist independiente por auditor.
   // ---------------------------------------------------------------
-  function writeDoc(){
-    if (!db || !ready || !sessionUsuario) return;
-    docState.updatedAt = new Date().toISOString();
+  function writeDocFor(countryId){
+    var st = docStates[countryId];
+    var c = COUNTRIES.find(function(x){ return x.id === countryId; });
+    if (!db || !ready || !sessionUsuario || !st || !c || !canEditCountry(countryId)) return;
+    st.updatedAt = new Date().toISOString();
     db.rpc('guardar_cierre_estado', {
       p_usuario: sessionUsuario,
       p_password: sessionPassword,
       p_mes: currentMonth,
-      p_statuses: docState.statuses,
-      p_notes: docState.notes || ''
+      p_auditor_id: currentAuditor.auditorId,
+      p_pais_id: c.dbId,
+      p_statuses: st.statuses,
+      p_notes: st.notes || ''
     }).then(function(res){
       if (res.error){
         console.error('write failed', res.error);
@@ -893,60 +1027,81 @@ select#monthSelect{
     });
   }
 
-  function setCell(k, value){
-    if (!ready) return;
-    var companyId = k.split('__')[1];
-    if (!canEditCompany(companyId)) return;
+  function setCell(countryId, k, value){
+    if (!ready || !canEditCountry(countryId)) return;
     if (STATES.indexOf(value) === -1) return;
-    docState.statuses[k] = value;
-    renderCells(docState.statuses);
-    renderSummary(docState.statuses);
-    writeDoc();
+    var st = docStates[countryId];
+    if (!st) return;
+    st.statuses[k] = value;
+    var c = COUNTRIES.find(function(x){ return x.id === countryId; });
+    if (c) renderCountryCells(c);
+    writeDocFor(countryId);
   }
 
-  function applyRow(row){
-    docState.statuses = (row && row.statuses) || {};
-    docState.notes = (row && row.notes) || '';
-    docState.updatedAt = (row && row.updated_at) || null;
+  function teardownChannels(){
+    Object.keys(docChannels).forEach(function(cid){
+      if (docChannels[cid]) docChannels[cid].unsubscribe();
+    });
+    docChannels = {};
+  }
+
+  function loadCountryDoc(c){
+    var auditorId = isOversight() ? (oversightAuditor[c.id] || null) : currentAuditor.auditorId;
+    if (auditorId == null){
+      docStates[c.id] = null;
+      renderCountryCells(c);
+      return;
+    }
+
+    db.from('cierre_regional_estados').select('*')
+      .eq('mes', currentMonth).eq('auditor_id', auditorId).eq('pais_id', c.dbId)
+      .maybeSingle().then(function(res){
+        if (res.error){
+          console.warn('read error', res.error);
+          syncText.textContent = 'Sin conexión en vivo';
+          syncIndicator.classList.add('offline');
+          return;
+        }
+        docStates[c.id] = {
+          statuses: (res.data && res.data.statuses) || {},
+          notes: (res.data && res.data.notes) || '',
+          updatedAt: (res.data && res.data.updated_at) || null,
+          auditorId: auditorId
+        };
+        renderCountryCells(c);
+      });
+
+    var channel = db
+      .channel('cre_' + c.id + '_' + auditorId + '_' + currentMonth)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cierre_regional_estados', filter: 'auditor_id=eq.' + auditorId }, function(payload){
+        var row = payload.new;
+        if (payload.eventType === 'DELETE' || !row || row.mes !== currentMonth || row.pais_id !== c.dbId) return;
+        docStates[c.id] = { statuses: row.statuses || {}, notes: row.notes || '', updatedAt: row.updated_at || null, auditorId: auditorId };
+        renderCountryCells(c);
+      })
+      .subscribe();
+    docChannels[c.id] = channel;
   }
 
   function subscribeMonth(id){
-    if (unsub) { unsub.unsubscribe(); unsub = null; }
+    teardownChannels();
     currentMonth = id;
-    docState = { statuses:{}, notes:'', updatedAt:null };
-    renderAll();
-    if (!db) return;
-
-    db.from('cierre_regional_estados').select('*').eq('mes', id).maybeSingle().then(function(res){
-      if (res.error){
-        console.warn('read error', res.error);
-        syncText.textContent = 'Sin conexión en vivo';
-        syncIndicator.classList.add('offline');
-        return;
-      }
-      if (res.data){
-        applyRow(res.data);
-      } else {
-        docState = { statuses: id === '2026-09' ? buildSeed() : {}, notes:'', updatedAt:null };
-        if (id === '2026-09'){ writeDoc(); }
-      }
-      renderAll();
+    docStates = {};
+    renderMatrixSkeleton();
+    if (!db || !currentAuditor) return;
+    activeCountries().forEach(function(c){
+      if (isOversight() && auditorsForCountry(c).length === 0) return;
+      loadCountryDoc(c);
     });
-
-    unsub = db
-      .channel('cierre_regional_estados_' + id)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cierre_regional_estados', filter: 'mes=eq.' + id }, function(payload){
-        if (payload.eventType === 'DELETE') return;
-        applyRow(payload.new);
-        renderAll();
-      })
-      .subscribe();
   }
 
   // ---------------------------------------------------------------
   // Wire up checklist controls
   // ---------------------------------------------------------------
-  monthSelect.addEventListener('change', function(){ subscribeMonth(monthSelect.value); });
+  monthSelect.addEventListener('change', function(){
+    subscribeMonth(monthSelect.value);
+    if (!reportView.hidden) loadAndRenderSummary();
+  });
 
   document.getElementById('toggleNewMonth').addEventListener('click', function(){
     var panel = document.getElementById('newMonthPanel');
@@ -961,36 +1116,24 @@ select#monthSelect{
     if (!id) return;
     ensureMonthOption(id, true);
     subscribeMonth(id);
-    docState = { statuses:{}, notes:'', updatedAt:new Date().toISOString() };
-    writeDoc();
     document.getElementById('newMonthPanel').classList.remove('open');
   });
 
   document.getElementById('btnNewDup').addEventListener('click', function(){
     var id = document.getElementById('newMonthInput').value;
-    if (!id) return;
-    var dup = JSON.parse(JSON.stringify(docState.statuses));
-    ensureMonthOption(id, true);
-    subscribeMonth(id);
-    docState = { statuses: dup, notes:'', updatedAt:new Date().toISOString() };
-    writeDoc();
+    if (!id || !currentMonth) return;
+    db.rpc('admin_crear_mes', {
+      p_usuario: sessionUsuario,
+      p_password: sessionPassword,
+      p_mes_nuevo: id,
+      p_mes_origen: currentMonth,
+      p_modo: 'duplicar'
+    }).then(function(res){
+      if (res.error){ alert('Error al crear el mes: ' + res.error.message); return; }
+      ensureMonthOption(id, true);
+      subscribeMonth(id);
+    });
     document.getElementById('newMonthPanel').classList.remove('open');
-  });
-
-  obsInput.addEventListener('input', function(){
-    docState.notes = obsInput.value;
-    obsHint.textContent = 'Escribiendo…';
-    obsDirty = true;
-    clearTimeout(obsSaveTimer);
-    obsSaveTimer = setTimeout(function(){
-      writeDoc();
-      obsHint.textContent = 'Guardado';
-      obsDirty = false;
-      setTimeout(function(){ if(!obsDirty) obsHint.textContent=''; }, 1500);
-    }, 800);
-  });
-  obsInput.addEventListener('blur', function(){
-    if (obsDirty){ clearTimeout(obsSaveTimer); writeDoc(); obsHint.textContent='Guardado'; obsDirty=false; }
   });
 
   // ---------------------------------------------------------------
@@ -1015,8 +1158,12 @@ select#monthSelect{
       PAISES_DB.forEach(function(p){ if (p.codigo) PAIS_ID_TO_CODE[p.id] = p.codigo.toLowerCase(); });
 
       buildStructures();
-      renderMatrixSkeleton();
-      renderAll();
+      if (ready && currentMonth){
+        subscribeMonth(currentMonth);
+        if (!reportView.hidden) loadAndRenderSummary();
+      } else {
+        renderMatrixSkeleton();
+      }
       if (isAdmin()){
         renderActividadesAdmin();
         renderEmpresasAdmin();
@@ -1041,7 +1188,10 @@ select#monthSelect{
       if (currentUser){
         currentAuditor = resolveAuditor(currentUser);
         applyUserUI();
-        renderCells(docState.statuses);
+        if (ready && currentMonth){
+          subscribeMonth(currentMonth);
+          if (!reportView.hidden) loadAndRenderSummary();
+        }
       }
     }).catch(function(e){
       console.error('loadDirectory failed', e);
@@ -1082,7 +1232,7 @@ select#monthSelect{
     navAdmin.classList.remove('active');
     topbarBar.style.background = 'var(--purple)';
     topbarTitle.textContent = 'Reporte · Cumplimiento Regional';
-    renderSummary(docState.statuses);
+    loadAndRenderSummary();
   }
   function showAdminView(){
     if (!isAdmin()) return;
@@ -1518,7 +1668,9 @@ select#monthSelect{
     currentAuditor = null;
     sessionUsuario = null;
     sessionPassword = null;
-    if (unsub){ unsub.unsubscribe(); unsub = null; }
+    teardownChannels();
+    docStates = {};
+    oversightAuditor = {};
     authOverlay.hidden = false;
     appShell.hidden = true;
     authPass.value = '';
