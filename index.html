@@ -122,6 +122,8 @@ aside.sidebar{
 .sb-item.active{ background:rgba(255,255,255,.15); color:#fff; font-weight:600; }
 .sb-item i{ font-size:15px; width:17px; text-align:center; color:rgba(255,255,255,.6); }
 .sb-item.active i{ color:#fff; }
+.sb-item.sb-subitem{ padding-left:2.1rem; font-size:11.5px; }
+.sb-item.sb-subitem i{ font-size:13px; width:15px; }
 .sb-foot{ border-top:1px solid rgba(255,255,255,.06); }
 .sb-user{
   padding:.7rem 1rem; display:flex; align-items:center; gap:8px;
@@ -209,9 +211,9 @@ table.datatable tbody tr:hover td{ background:var(--grayBg); }
 
 /* ---------- summary tiles ---------- */
 .summary{
-  display:grid; grid-template-columns:1.15fr repeat(5,1fr); gap:12px; margin-bottom:16px;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:12px; margin-bottom:16px;
 }
-@media (max-width:1050px){ .summary{ grid-template-columns:repeat(2,1fr); } }
+.summary.summary-solo{ grid-template-columns:minmax(220px,360px); }
 @media (max-width:620px){ .summary{ grid-template-columns:1fr; } }
 .tile{
   background:var(--surface); border:1px solid var(--border); border-radius:12px;
@@ -223,11 +225,11 @@ table.datatable tbody tr:hover td{ background:var(--grayBg); }
 }
 .tile-label{
   font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
-  color:var(--text3); margin-bottom:8px;
+  color:var(--text3); margin-bottom:8px; overflow-wrap:break-word;
 }
-.tile-pct{ font-size:28px; font-weight:800; line-height:1; }
+.tile-pct{ font-size:28px; font-weight:800; line-height:1; overflow-wrap:break-word; }
 .tile.global .tile-pct{ font-size:36px; }
-.tile-count{ font-size:12px; color:var(--text3); margin-top:4px; }
+.tile-count{ font-size:12px; color:var(--text3); margin-top:4px; overflow-wrap:break-word; }
 .bar{ margin-top:10px; height:7px; border-radius:4px; background:var(--grayBg); overflow:hidden; display:flex; }
 .bar span{ height:100%; display:block; }
 .bar .b-si{ background:var(--success); }
@@ -409,6 +411,9 @@ select#monthSelect{
       <div class="sb-item active" id="navChecklist"><i class="ti ti-checklist"></i>Checklist</div>
       <div class="sb-item" id="navReport"><i class="ti ti-chart-bar"></i>Reporte</div>
       <div class="sb-item" id="navAdmin"><i class="ti ti-settings"></i>Administraci&oacute;n</div>
+      <div class="sb-item sb-subitem" id="navAdminUsuarios"><i class="ti ti-users"></i>Usuarios</div>
+      <div class="sb-item sb-subitem" id="navAdminActividades"><i class="ti ti-list-check"></i>Actividades de cierre</div>
+      <div class="sb-item sb-subitem" id="navAdminEmpresas"><i class="ti ti-building"></i>Empresas</div>
     </nav>
     <div class="sb-foot">
       <div class="sb-user">
@@ -470,11 +475,6 @@ select#monthSelect{
       </div>
 
       <div id="adminView" hidden>
-        <div class="admin-tabs">
-          <button type="button" class="btn sm primary" id="tabBtnUsuarios">Usuarios</button>
-          <button type="button" class="btn sm" id="tabBtnActividades">Actividades de cierre</button>
-          <button type="button" class="btn sm" id="tabBtnEmpresas">Empresas</button>
-        </div>
 
         <section class="panel" id="adminPanelUsuarios">
           <div class="panel-head">
@@ -681,16 +681,26 @@ select#monthSelect{
   }
 
   // "Modo consulta": usuarios rol=admin sin un auditor propio vinculado.
-  // Pueden ver (solo lectura) el checklist de cualquier auditor, país por
-  // país, pero no tienen un checklist personal que editar.
+  // Pueden ver el checklist de cualquier auditor, país por país, eligiendo
+  // con el selector de auditor — y, con un auditor elegido, también pueden
+  // editarlo directamente (a nombre de ese auditor), no solo verlo.
   function isOversight(){
     return !!currentAuditor && currentAuditor.auditorId == null;
   }
   function isAdmin(){
     return !!currentAuditor && currentAuditor.countries.length >= ALL_COUNTRY_IDS.length;
   }
+  function effectiveAuditorId(countryId){
+    return isOversight() ? (oversightAuditor[countryId] != null ? oversightAuditor[countryId] : null) : (currentAuditor && currentAuditor.auditorId);
+  }
   function canEditCountry(countryId){
-    return !!currentAuditor && currentAuditor.auditorId != null && currentAuditor.countries.indexOf(countryId) !== -1;
+    if (!currentAuditor) return false;
+    if (currentAuditor.auditorId != null){
+      return currentAuditor.countries.indexOf(countryId) !== -1;
+    }
+    // Modo consulta (admin sin auditor propio): editable en cuanto hay un
+    // auditor seleccionado en el selector de ese país.
+    return isOversight() && effectiveAuditorId(countryId) != null;
   }
   function auditorsForCountry(c){
     return AUDITORES.filter(function(a){ return a.estado === 'Activo' && (a.pais_ids || []).indexOf(c.dbId) !== -1; });
@@ -806,7 +816,7 @@ select#monthSelect{
         }).filter(function(x){ return x.stats.total > 0; });
 
         var html = '';
-        html += '<div class="summary-group"><div class="summary-group-title">Global</div><div class="summary">';
+        html += '<div class="summary-group"><div class="summary-group-title">Global</div><div class="summary summary-solo">';
         html += '<div class="tile global">' +
           '<div class="tile-label">Cumplimiento regional</div>' +
           '<div class="tile-pct num" style="color:' + pctColor(global.pct) + '">' + (global.pct===null? '—' : global.pct+'%') + '</div>' +
@@ -984,7 +994,7 @@ select#monthSelect{
       sel.value = v;
       sel.className = 'cell ' + v;
       sel.disabled = !editable;
-      sel.title = editable ? '' : (isOversight() ? 'Modo consulta: solo lectura' : '');
+      sel.title = editable ? (isOversight() ? 'Editando a nombre del auditor seleccionado' : '') : (isOversight() ? 'Selecciona un auditor arriba para poder editar' : '');
     });
 
     var ta = panel.querySelector('textarea.obs-input');
@@ -1003,18 +1013,22 @@ select#monthSelect{
   // "guardar_cierre_estado" RPC, which re-checks usuario+password
   // server-side before saving — the table itself has no anon write
   // policy, so this is the only path in. Cada fila corresponde a un
-  // (mes, auditor, país) — checklist independiente por auditor.
+  // (mes, auditor, país) — checklist independiente por auditor. En modo
+  // consulta (admin), se guarda a nombre del auditor elegido en el
+  // selector, no del admin (que no tiene auditor propio).
   // ---------------------------------------------------------------
   function writeDocFor(countryId){
     var st = docStates[countryId];
     var c = COUNTRIES.find(function(x){ return x.id === countryId; });
     if (!db || !ready || !sessionUsuario || !st || !c || !canEditCountry(countryId)) return;
+    var auditorId = effectiveAuditorId(countryId);
+    if (auditorId == null) return;
     st.updatedAt = new Date().toISOString();
     db.rpc('guardar_cierre_estado', {
       p_usuario: sessionUsuario,
       p_password: sessionPassword,
       p_mes: currentMonth,
-      p_auditor_id: currentAuditor.auditorId,
+      p_auditor_id: auditorId,
       p_pais_id: c.dbId,
       p_statuses: st.statuses,
       p_notes: st.notes || ''
@@ -1210,16 +1224,23 @@ select#monthSelect{
   var navChecklist = document.getElementById('navChecklist');
   var navReport = document.getElementById('navReport');
   var navAdmin = document.getElementById('navAdmin');
+  var navAdminUsuarios = document.getElementById('navAdminUsuarios');
+  var navAdminActividades = document.getElementById('navAdminActividades');
+  var navAdminEmpresas = document.getElementById('navAdminEmpresas');
   var topbarBar = document.getElementById('topbarBar');
   var topbarTitle = document.getElementById('topbarTitle');
+
+  var ALL_NAV_ITEMS = [navChecklist, navReport, navAdmin, navAdminUsuarios, navAdminActividades, navAdminEmpresas];
+  function setActiveNav(el){
+    ALL_NAV_ITEMS.forEach(function(n){ if (n) n.classList.remove('active'); });
+    if (el) el.classList.add('active');
+  }
 
   function showChecklistView(){
     reportView.hidden = true;
     adminView.hidden = true;
     checklistView.hidden = false;
-    navChecklist.classList.add('active');
-    navReport.classList.remove('active');
-    navAdmin.classList.remove('active');
+    setActiveNav(navChecklist);
     topbarBar.style.background = 'var(--primary)';
     topbarTitle.textContent = 'Checklist · Cierre Contable Regional';
   }
@@ -1227,38 +1248,35 @@ select#monthSelect{
     checklistView.hidden = true;
     adminView.hidden = true;
     reportView.hidden = false;
-    navReport.classList.add('active');
-    navChecklist.classList.remove('active');
-    navAdmin.classList.remove('active');
+    setActiveNav(navReport);
     topbarBar.style.background = 'var(--purple)';
     topbarTitle.textContent = 'Reporte · Cumplimiento Regional';
     loadAndRenderSummary();
   }
-  function showAdminView(){
+  function showAdminView(tab){
     if (!isAdmin()) return;
     checklistView.hidden = true;
     reportView.hidden = true;
     adminView.hidden = false;
-    navAdmin.classList.add('active');
-    navChecklist.classList.remove('active');
-    navReport.classList.remove('active');
     topbarBar.style.background = 'var(--gray)';
     topbarTitle.textContent = 'Administración · Cierre Contable Regional';
-    showAdminTab('usuarios');
+    showAdminTab(tab || 'usuarios');
     loadUsuarios();
     renderActividadesAdmin();
     renderEmpresasAdmin();
   }
   navChecklist.addEventListener('click', showChecklistView);
   navReport.addEventListener('click', showReportView);
-  navAdmin.addEventListener('click', showAdminView);
+  navAdmin.addEventListener('click', function(){ showAdminView('usuarios'); });
+  navAdminUsuarios.addEventListener('click', function(){ showAdminView('usuarios'); });
+  navAdminActividades.addEventListener('click', function(){ showAdminView('actividades'); });
+  navAdminEmpresas.addEventListener('click', function(){ showAdminView('empresas'); });
 
   // ---------------------------------------------------------------
-  // Administración: sub-pestañas Usuarios / Actividades / Empresas
+  // Administración: Usuarios / Actividades / Empresas, cada una
+  // accesible directamente desde su propio ítem en el menú lateral
+  // (debajo de "Administración"), en vez de pestañas dentro del panel.
   // ---------------------------------------------------------------
-  var tabBtnUsuarios = document.getElementById('tabBtnUsuarios');
-  var tabBtnActividades = document.getElementById('tabBtnActividades');
-  var tabBtnEmpresas = document.getElementById('tabBtnEmpresas');
   var adminPanelUsuarios = document.getElementById('adminPanelUsuarios');
   var adminPanelActividades = document.getElementById('adminPanelActividades');
   var adminPanelEmpresas = document.getElementById('adminPanelEmpresas');
@@ -1267,13 +1285,12 @@ select#monthSelect{
     adminPanelUsuarios.hidden = tab !== 'usuarios';
     adminPanelActividades.hidden = tab !== 'actividades';
     adminPanelEmpresas.hidden = tab !== 'empresas';
-    tabBtnUsuarios.classList.toggle('primary', tab === 'usuarios');
-    tabBtnActividades.classList.toggle('primary', tab === 'actividades');
-    tabBtnEmpresas.classList.toggle('primary', tab === 'empresas');
+    setActiveNav(
+      tab === 'usuarios' ? navAdminUsuarios :
+      tab === 'actividades' ? navAdminActividades :
+      tab === 'empresas' ? navAdminEmpresas : navAdmin
+    );
   }
-  tabBtnUsuarios.addEventListener('click', function(){ showAdminTab('usuarios'); });
-  tabBtnActividades.addEventListener('click', function(){ showAdminTab('actividades'); });
-  tabBtnEmpresas.addEventListener('click', function(){ showAdminTab('empresas'); });
 
   function slugify(s){
     return (s || '').toString().toLowerCase()
@@ -1313,7 +1330,7 @@ select#monthSelect{
         '</tr>';
     });
     tbody.innerHTML = html || '<tr><td colspan="6" style="color:var(--text3);">Sin usuarios.</td></tr>';
-    tbody.querySelectorAll('[data-edit-usuario]').forEach(function(btn){
+    tbody.querySelectorAll('[data-edit-usuario]').forEach(function(btn);
       btn.addEventListener('click', function(){ openUsuarioForm(parseInt(btn.getAttribute('data-edit-usuario'), 10)); });
     });
     tbody.querySelectorAll('[data-del-usuario]').forEach(function(btn){
@@ -1547,7 +1564,7 @@ select#monthSelect{
           '<button type="button" class="icon-btn" data-del-empresa="' + e.id + '"><i class="ti ti-trash"></i></button></td></tr>';
     });
     tbody.innerHTML = html || '<tr><td colspan="5" style="color:var(--text3);">Sin empresas.</td></tr>';
-    tbody.querySelectorAll('[data-edit-empresa]').forEach(function(btn){
+    tbody.querySelectorAll('[data-edit-empresa]').forEach(function(btn);
       btn.addEventListener('click', function(){ openEmpresaForm(parseInt(btn.getAttribute('data-edit-empresa'), 10)); });
     });
     tbody.querySelectorAll('[data-del-empresa]').forEach(function(btn){
@@ -1649,7 +1666,11 @@ select#monthSelect{
       roleEl.textContent = currentUser.rol === 'admin' ? 'Administrador' : 'Solo lectura';
     }
     document.getElementById('toggleNewMonth').hidden = !isAdmin();
-    document.getElementById('navAdmin').style.display = isAdmin() ? '' : 'none';
+    var adminDisplay = isAdmin() ? '' : 'none';
+    document.getElementById('navAdmin').style.display = adminDisplay;
+    document.getElementById('navAdminUsuarios').style.display = adminDisplay;
+    document.getElementById('navAdminActividades').style.display = adminDisplay;
+    document.getElementById('navAdminEmpresas').style.display = adminDisplay;
   }
 
   function enterApp(){
