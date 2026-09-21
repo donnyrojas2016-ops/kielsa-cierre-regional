@@ -230,6 +230,26 @@ table.datatable tbody tr:hover td{ background:var(--grayBg); }
 .tile-pct{ font-size:28px; font-weight:800; line-height:1; overflow-wrap:break-word; }
 .tile.global .tile-pct{ font-size:36px; }
 .tile-count{ font-size:12px; color:var(--text3); margin-top:4px; overflow-wrap:break-word; }
+
+/* tarjeta con encabezado de color + bandera (Por país / Por auditor) */
+.tile-card{ padding:0; overflow:hidden; }
+.tile-header{
+  position:relative; padding:10px 14px; display:flex; align-items:center; min-height:36px;
+  background:linear-gradient(135deg,#0f1e5c,var(--primary) 55%,#3b82f6);
+  overflow:hidden;
+}
+.tile-header.aud{ background:linear-gradient(135deg,#3b1f75,var(--purple) 60%,#8b5cf6); }
+.tile-flag{
+  position:absolute; top:0; right:0; bottom:0; width:58%;
+  background-size:cover; background-position:center; opacity:.85;
+}
+.tile-scrim{ position:absolute; inset:0; background:linear-gradient(90deg,#0f1e5c 32%,transparent 92%); }
+.tile-header.aud .tile-scrim{ background:linear-gradient(90deg,#3b1f75 32%,transparent 92%); }
+.tile-header span{
+  position:relative; z-index:1; color:#fff; font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; overflow-wrap:break-word;
+}
+.tile-body{ padding:14px 16px 15px; }
 .bar{ margin-top:10px; height:7px; border-radius:4px; background:var(--grayBg); overflow:hidden; display:flex; }
 .bar span{ height:100%; display:block; }
 .bar .b-si{ background:var(--success); }
@@ -783,12 +803,18 @@ select#monthSelect{
     return { si:si, no:no, proceso:proceso, noRev:noRev, total:total, pct:pct };
   }
 
-  function tileHtml(label, s){
-    return '<div class="tile">' +
-      '<div class="tile-label">' + label + '</div>' +
-      '<div class="tile-pct num" style="color:' + pctColor(s.pct) + '">' + (s.pct===null? '—' : s.pct+'%') + '</div>' +
-      '<div class="tile-count num">' + s.si + '/' + s.total + ' completadas' + (s.proceso? ' · ' + s.proceso + ' en proceso' : '') + '</div>' +
-      barHtml(s) +
+  function tileHtml(label, s, flagCode){
+    var isAud = !flagCode;
+    return '<div class="tile tile-card">' +
+      '<div class="tile-header' + (isAud ? ' aud' : '') + '">' +
+        (flagCode ? '<div class="tile-flag" style="background-image:url(https://flagcdn.com/w320/' + flagCode + '.png)"></div><div class="tile-scrim"></div>' : '') +
+        '<span>' + label + '</span>' +
+      '</div>' +
+      '<div class="tile-body">' +
+        '<div class="tile-pct num" style="color:' + pctColor(s.pct) + '">' + (s.pct===null? '—' : s.pct+'%') + '</div>' +
+        '<div class="tile-count num">' + s.si + '/' + s.total + ' completadas' + (s.proceso? ' · ' + s.proceso + ' en proceso' : '') + '</div>' +
+        barHtml(s) +
+      '</div>' +
       '</div>';
   }
 
@@ -809,7 +835,7 @@ select#monthSelect{
         var slots = buildExpectedSlots();
         var global = statsForSlots(slots, rowsMap);
         var byPais = COUNTRIES.map(function(c){
-          return { name: c.name, stats: statsForSlots(slots.filter(function(s){ return s.pais.id === c.id; }), rowsMap) };
+          return { name: c.name, code: c.id, stats: statsForSlots(slots.filter(function(s){ return s.pais.id === c.id; }), rowsMap) };
         });
         var byAuditor = AUDITORES.filter(function(a){ return a.estado === 'Activo'; }).map(function(a){
           return { name: a.nombre, stats: statsForSlots(slots.filter(function(s){ return s.auditorId === a.id; }), rowsMap) };
@@ -825,7 +851,7 @@ select#monthSelect{
         html += '</div></div>';
 
         html += '<div class="summary-group"><div class="summary-group-title">Por país</div><div class="summary">';
-        byPais.forEach(function(c){ html += tileHtml(c.name, c.stats); });
+        byPais.forEach(function(c){ html += tileHtml(c.name, c.stats, c.code); });
         html += '</div></div>';
 
         html += '<div class="summary-group"><div class="summary-group-title">Por auditor</div><div class="summary">';
