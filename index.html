@@ -1330,7 +1330,7 @@ select#monthSelect{
         '</tr>';
     });
     tbody.innerHTML = html || '<tr><td colspan="6" style="color:var(--text3);">Sin usuarios.</td></tr>';
-    tbody.querySelectorAll('[data-edit-usuario]').forEach(function(btn);
+    tbody.querySelectorAll('[data-edit-usuario]').forEach(function(btn){
       btn.addEventListener('click', function(){ openUsuarioForm(parseInt(btn.getAttribute('data-edit-usuario'), 10)); });
     });
     tbody.querySelectorAll('[data-del-usuario]').forEach(function(btn){
@@ -1564,7 +1564,7 @@ select#monthSelect{
           '<button type="button" class="icon-btn" data-del-empresa="' + e.id + '"><i class="ti ti-trash"></i></button></td></tr>';
     });
     tbody.innerHTML = html || '<tr><td colspan="5" style="color:var(--text3);">Sin empresas.</td></tr>';
-    tbody.querySelectorAll('[data-edit-empresa]').forEach(function(btn);
+    tbody.querySelectorAll('[data-edit-empresa]').forEach(function(btn){
       btn.addEventListener('click', function(){ openEmpresaForm(parseInt(btn.getAttribute('data-edit-empresa'), 10)); });
     });
     tbody.querySelectorAll('[data-del-empresa]').forEach(function(btn){
