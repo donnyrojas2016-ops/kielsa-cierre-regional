@@ -250,6 +250,14 @@ table.datatable tbody tr:hover td{ background:var(--grayBg); }
   letter-spacing:.05em; text-transform:uppercase; overflow-wrap:break-word;
 }
 .tile-body{ padding:14px 16px 15px; }
+.tile-card[data-country-nav]{ cursor:pointer; transition:box-shadow .15s,transform .15s; }
+.tile-card[data-country-nav]:hover{ box-shadow:0 4px 12px rgba(20,30,40,.14); transform:translateY(-1px); }
+.tile-card[data-country-nav]:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.country-panel-highlight{ animation:countryPanelFlash 1.6s ease-out; }
+@keyframes countryPanelFlash{
+  0%{ box-shadow:0 0 0 3px var(--primary); }
+  100%{ box-shadow:0 1px 3px rgba(0,0,0,.06); }
+}
 .bar{ margin-top:10px; height:7px; border-radius:4px; background:var(--grayBg); overflow:hidden; display:flex; }
 .bar span{ height:100%; display:block; }
 .bar .b-si{ background:var(--success); }
@@ -300,6 +308,7 @@ tr.activity-row td.cell-wrap:first-of-type{ border-left:none; }
 .cell.no{ background:var(--dangerBg); color:var(--danger); border-color:#c0392b55; }
 .cell.no_revisado{ background:var(--grayBg); color:var(--gray); border-color:#64748b40; }
 .cell.en_proceso{ background:var(--warningBg); color:var(--warning); border-color:#b4530955; }
+.cell.na{ background:var(--grayBg); color:var(--text3); border-color:#64748b30; font-style:italic; }
 
 .legend{ display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
 .legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
@@ -803,24 +812,27 @@ select#monthSelect{
   }
 
   function statsForSlots(slots, rowsMap){
-    var si=0,no=0,proceso=0,noRev=0;
+    var si=0,no=0,proceso=0,noRev=0,na=0;
     slots.forEach(function(s){
       var statuses = rowsMap[s.pais.dbId + '_' + s.auditorId] || {};
       ACTIVITIES.forEach(function(a){
         s.pais.companies.forEach(function(co){
           var v = statuses[key(a.id, co.id)] || 'no_revisado';
-          if (v==='si') si++; else if (v==='no') no++; else if (v==='en_proceso') proceso++; else noRev++;
+          // "No aplica" no cuenta ni como completada ni como pendiente —
+          // se excluye por completo del % de cumplimiento.
+          if (v==='si') si++; else if (v==='no') no++; else if (v==='en_proceso') proceso++; else if (v==='na') na++; else noRev++;
         });
       });
     });
     var total = si+no+proceso+noRev;
     var pct = total ? Math.round(si/total*100) : null;
-    return { si:si, no:no, proceso:proceso, noRev:noRev, total:total, pct:pct };
+    return { si:si, no:no, proceso:proceso, noRev:noRev, na:na, total:total, pct:pct };
   }
 
   function tileHtml(label, s, flagCode){
     var isAud = !flagCode;
-    return '<div class="tile tile-card">' +
+    var navAttrs = flagCode ? ' data-country-nav="' + flagCode + '" tabindex="0" role="button" aria-label="Ver checklist de ' + label + '"' : '';
+    return '<div class="tile tile-card"' + navAttrs + '>' +
       '<div class="tile-header' + (isAud ? ' aud' : '') + '">' +
         (flagCode ? '<div class="tile-flag" style="background-image:url(https://flagcdn.com/w320/' + flagCode + '.png)"></div><div class="tile-scrim"></div>' : '') +
         '<span>' + label + '</span>' +
@@ -832,6 +844,30 @@ select#monthSelect{
       '</div>' +
       '</div>';
   }
+
+  // Ir de una tarjeta de país en el Reporte al Checklist de ese país, con
+  // scroll automático y un resalte breve para ubicarlo de inmediato.
+  function goToChecklistCountry(countryId){
+    showChecklistView();
+    var panel = document.querySelector('[data-country-panel="' + countryId + '"]');
+    if (!panel) return;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    panel.classList.remove('country-panel-highlight');
+    void panel.offsetWidth; // reinicia la animación si se hace click varias veces
+    panel.classList.add('country-panel-highlight');
+    setTimeout(function(){ panel.classList.remove('country-panel-highlight'); }, 1700);
+  }
+  document.getElementById('summaryTiles').addEventListener('click', function(ev){
+    var t = ev.target.closest('[data-country-nav]');
+    if (t) goToChecklistCountry(t.getAttribute('data-country-nav'));
+  });
+  document.getElementById('summaryTiles').addEventListener('keydown', function(ev){
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    var t = ev.target.closest('[data-country-nav]');
+    if (!t) return;
+    ev.preventDefault();
+    goToChecklistCountry(t.getAttribute('data-country-nav'));
+  });
 
   function loadAndRenderSummary(){
     var el = document.getElementById('summaryTiles');
@@ -984,6 +1020,7 @@ select#monthSelect{
                   '<option value="si">Sí</option>' +
                   '<option value="no">No</option>' +
                   '<option value="en_proceso">En proceso</option>' +
+                  '<option value="na">No aplica</option>' +
                 '</select></td>';
             });
             html += '</tr>';
