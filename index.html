@@ -522,7 +522,7 @@ select#monthSelect{
             <div class="af-field" id="usrPaisesField" style="grid-column:1/-1;">
               <label>País(es) que debe llenar en el Checklist</label>
               <div class="af-paises-list" id="usrPaisesList"></div>
-              <div class="af-paises-hint">Solo aplica para el rol Auditor · el Administrador ve todos los países.</div>
+              <div class="af-paises-hint">Cada país solo puede tener un auditor responsable: si lo marcas aquí, se lo quita automáticamente a quien lo tuviera antes. Solo aplica para el rol Auditor · el Administrador ve todos los países.</div>
             </div>
             <div class="af-actions">
               <button type="button" class="btn sm primary" id="btnGuardarUsuario">Guardar</button>
@@ -1485,25 +1485,52 @@ select#monthSelect{
   // usuario ya tiene un auditor vinculado, actualiza su pais_ids; si es
   // auditor nuevo (sin vincular) y se marcó al menos un país, crea el
   // registro en "auditores" y lo vincula automáticamente al usuario.
+  // Cada país solo puede tener UN auditor responsable a la vez (para que el
+  // % de cumplimiento por país refleje un único alcance real, no un
+  // promedio entre varios). Antes de guardar la asignación de un auditor,
+  // se le quita ese país a cualquier OTRO auditor activo que lo tuviera.
+  function liberarPaisesDeOtrosAuditores(paisIds, exceptAuditorId){
+    if (!paisIds.length) return Promise.resolve(null);
+    var afectados = AUDITORES.filter(function(a){
+      return a.id !== exceptAuditorId && (a.pais_ids || []).some(function(pid){ return paisIds.indexOf(pid) !== -1; });
+    });
+    if (!afectados.length) return Promise.resolve(null);
+    var tasks = afectados.map(function(a){
+      var nuevos = (a.pais_ids || []).filter(function(pid){ return paisIds.indexOf(pid) === -1; });
+      return db.from('auditores').update({ pais_ids: nuevos }).eq('id', a.id).then(function(res){
+        if (res.error) return res.error.message;
+        a.pais_ids = nuevos;
+        return null;
+      });
+    });
+    return Promise.all(tasks).then(function(errs){
+      var err = errs.filter(function(e){ return e; })[0];
+      return err || null;
+    });
+  }
+
   function guardarPaisesAuditor(rol, auditorIdRaw, nombreFallback, usuarioId, paisIds){
     if (rol !== 'auditor') return Promise.resolve(null);
     var auditorId = auditorIdRaw ? parseInt(auditorIdRaw, 10) : null;
-    if (auditorId != null){
-      return db.from('auditores').update({ pais_ids: paisIds }).eq('id', auditorId).then(function(res){
+    return liberarPaisesDeOtrosAuditores(paisIds, auditorId).then(function(errLiberar){
+      if (errLiberar) return errLiberar;
+      if (auditorId != null){
+        return db.from('auditores').update({ pais_ids: paisIds }).eq('id', auditorId).then(function(res){
+          if (res.error) return res.error.message;
+          var a = AUDITORES.find(function(x){ return x.id === auditorId; });
+          if (a) a.pais_ids = paisIds;
+          return null;
+        });
+      }
+      if (!paisIds.length) return Promise.resolve(null);
+      return db.from('auditores').insert({ nombre: nombreFallback, pais_ids: paisIds, estado: 'Activo' }).select().single().then(function(res){
         if (res.error) return res.error.message;
-        var a = AUDITORES.find(function(x){ return x.id === auditorId; });
-        if (a) a.pais_ids = paisIds;
-        return null;
-      });
-    }
-    if (!paisIds.length) return Promise.resolve(null);
-    return db.from('auditores').insert({ nombre: nombreFallback, pais_ids: paisIds, estado: 'Activo' }).select().single().then(function(res){
-      if (res.error) return res.error.message;
-      var newAuditor = res.data;
-      AUDITORES.push(newAuditor);
-      return db.from('usuarios').update({ auditor_id: newAuditor.id }).eq('id', usuarioId).then(function(res2){
-        if (res2.error) return res2.error.message;
-        return null;
+        var newAuditor = res.data;
+        AUDITORES.push(newAuditor);
+        return db.from('usuarios').update({ auditor_id: newAuditor.id }).eq('id', usuarioId).then(function(res2){
+          if (res2.error) return res2.error.message;
+          return null;
+        });
       });
     });
   }
