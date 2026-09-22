@@ -294,7 +294,7 @@ tr.activity-row:nth-child(even) td.actname{ background:var(--grayBg); }
 tr.activity-row:nth-child(even) td.cell-wrap{ background:var(--grayBg); }
 tr.activity-row:hover td.actname{ background:var(--primaryLight); }
 tr.activity-row:hover td.cell-wrap{ background:var(--primaryLight); }
-.cell-wrap{ padding:9px 11px; text-align:center; border-left:1px solid var(--border); }
+.cell-wrap{ padding:9px 11px; text-align:center; border-left:1px solid var(--border); position:relative; }
 tr.activity-row td.cell-wrap:first-of-type{ border-left:none; }
 .cell{
   width:100%; min-height:36px; border:1px solid transparent; border-radius:8px; padding:8px 10px;
@@ -309,6 +309,31 @@ tr.activity-row td.cell-wrap:first-of-type{ border-left:none; }
 .cell.no_revisado{ background:var(--grayBg); color:var(--gray); border-color:#64748b40; }
 .cell.en_proceso{ background:var(--warningBg); color:var(--warning); border-color:#b4530955; }
 .cell.na{ background:var(--grayBg); color:var(--text3); border-color:#64748b30; font-style:italic; }
+
+.cell-note-btn{
+  position:absolute; top:3px; right:3px; width:18px; height:18px; border:none; border-radius:5px;
+  background:transparent; color:var(--text3); opacity:.4; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; padding:0; font-size:12px; line-height:1; transition:opacity .15s,background .15s,color .15s;
+}
+.cell-note-btn:hover{ opacity:1; background:var(--primaryLight); color:var(--primary); }
+.cell-note-btn.has-note{ opacity:1; color:var(--primary); background:var(--primaryLight); }
+.cell-note-pop{
+  position:fixed; z-index:60; width:240px; background:var(--surface); border:1px solid var(--border2);
+  border-radius:10px; box-shadow:0 8px 24px rgba(20,30,40,.18); padding:12px; display:none;
+}
+.cell-note-pop.open{ display:block; }
+.cell-note-pop .cnp-title{ font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:6px; }
+.cell-note-pop textarea{
+  width:100%; min-height:64px; border:1px solid var(--border2); border-radius:6px; padding:8px; font:inherit;
+  font-size:12.5px; resize:vertical; box-sizing:border-box; color:var(--text);
+}
+.cell-note-pop textarea:disabled{ background:var(--grayBg); color:var(--text2); }
+.cell-note-pop .cnp-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+.cell-note-pop .cnp-actions button{
+  border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;
+}
+.cell-note-pop .cnp-close{ background:var(--grayBg); color:var(--text2); }
+.cell-note-pop .cnp-save{ background:var(--primary); color:#fff; }
 
 .legend{ display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
 .legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
@@ -496,6 +521,14 @@ select#monthSelect{
 
       <div id="checklistView">
         <div id="matrixContainer"></div>
+        <div class="cell-note-pop" id="cellNotePop">
+          <span class="cnp-title">Avance / nota</span>
+          <textarea id="cellNotePopText" placeholder="Ej: 0 pendientes de 88 documentos"></textarea>
+          <div class="cnp-actions">
+            <button type="button" class="cnp-close" id="cellNotePopClose">Cerrar</button>
+            <button type="button" class="cnp-save" id="cellNotePopSave">Guardar</button>
+          </div>
+        </div>
 
         <div class="note-card" style="margin-bottom:16px;">
           <div class="legend" style="margin-bottom:10px;">
@@ -678,6 +711,7 @@ select#monthSelect{
   var STATE_LABEL = { si:'Sí', no:'No', no_revisado:'No revisado', en_proceso:'En proceso' };
 
   function key(actId, coId){ return actId + '__' + coId; }
+  function noteKey(k){ return k + '::nota'; }
 
   // ---------------------------------------------------------------
   // State
@@ -1014,14 +1048,17 @@ select#monthSelect{
             html += '<tr class="activity-row" data-activity="' + a.id + '">';
             html += '<td class="actname">' + a.name + '</td>';
             c.companies.forEach(function(co){
+              var ck = key(a.id, co.id);
               html += '<td class="cell-wrap" data-company="' + co.id + '">' +
-                '<select class="cell" data-key="' + key(a.id, co.id) + '" aria-label="' + a.name + ' · ' + co.name + '">' +
+                '<select class="cell" data-key="' + ck + '" aria-label="' + a.name + ' · ' + co.name + '">' +
                   '<option value="no_revisado">No revisado</option>' +
                   '<option value="si">Sí</option>' +
                   '<option value="no">No</option>' +
                   '<option value="en_proceso">En proceso</option>' +
                   '<option value="na">No aplica</option>' +
-                '</select></td>';
+                '</select>' +
+                '<button type="button" class="cell-note-btn" data-key="' + ck + '" title="Avance / nota"><i class="ti ti-note"></i></button>' +
+                '</td>';
             });
             html += '</tr>';
           });
@@ -1045,6 +1082,14 @@ select#monthSelect{
         var panel = sel.closest('[data-country-panel]');
         var countryId = panel ? panel.getAttribute('data-country-panel') : null;
         if (countryId) setCell(countryId, sel.getAttribute('data-key'), sel.value);
+      });
+    });
+
+    container.querySelectorAll('button.cell-note-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var panel = btn.closest('[data-country-panel]');
+        var countryId = panel ? panel.getAttribute('data-country-panel') : null;
+        if (countryId) openCellNotePopover(btn, countryId, btn.getAttribute('data-key'));
       });
     });
 
@@ -1094,6 +1139,13 @@ select#monthSelect{
       sel.className = 'cell ' + v;
       sel.disabled = !editable;
       sel.title = editable ? (isOversight() ? 'Editando a nombre del auditor seleccionado' : '') : (isOversight() ? 'Selecciona un auditor arriba para poder editar' : '');
+    });
+
+    panel.querySelectorAll('button.cell-note-btn').forEach(function(btn){
+      var k = btn.getAttribute('data-key');
+      var nota = statuses[noteKey(k)] || '';
+      btn.classList.toggle('has-note', !!nota);
+      btn.title = nota ? ('Avance / nota: ' + nota) : 'Avance / nota';
     });
 
     var ta = panel.querySelector('textarea.obs-input');
@@ -1150,6 +1202,75 @@ select#monthSelect{
     if (c) renderCountryCells(c);
     writeDocFor(countryId);
   }
+
+  // ---------------------------------------------------------------
+  // Nota / avance por celda. Se guarda dentro del mismo JSON de
+  // "statuses" bajo una llave hermana (key + '::nota'), sin tocar el
+  // RPC ni el calculo de % (que solo lee las llaves exactas de
+  // actividad+empresa). Sirve para anotar avance manual, por ejemplo
+  // "0 pendientes de 88 documentos" al revisar LDFAS.
+  // ---------------------------------------------------------------
+  var cellNotePopCtx = null;
+
+  function openCellNotePopover(btn, countryId, k){
+    var pop = document.getElementById('cellNotePop');
+    var text = document.getElementById('cellNotePopText');
+    var saveBtn = document.getElementById('cellNotePopSave');
+    if (!pop || !text || !saveBtn) return;
+    var st = docStates[countryId];
+    var editable = ready && !!st && canEditCountry(countryId);
+    cellNotePopCtx = { countryId: countryId, key: k, btn: btn };
+    text.value = (st && st.statuses && st.statuses[noteKey(k)]) || '';
+    text.disabled = !editable;
+    saveBtn.style.display = editable ? '' : 'none';
+
+    var r = btn.getBoundingClientRect();
+    pop.classList.add('open');
+    var popW = 240;
+    var left = Math.min(Math.max(8, r.left - popW + r.width), window.innerWidth - popW - 8);
+    var top = r.bottom + 6;
+    if (top + 140 > window.innerHeight) top = Math.max(8, r.top - 146);
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+    if (editable) text.focus();
+  }
+
+  function closeCellNotePopover(){
+    var pop = document.getElementById('cellNotePop');
+    if (pop) pop.classList.remove('open');
+    cellNotePopCtx = null;
+  }
+
+  function saveCellNotePopover(){
+    if (!cellNotePopCtx) return;
+    var text = document.getElementById('cellNotePopText');
+    var ctx = cellNotePopCtx;
+    var st = docStates[ctx.countryId];
+    if (!st || !canEditCountry(ctx.countryId)){ closeCellNotePopover(); return; }
+    st.statuses[noteKey(ctx.key)] = text ? text.value : '';
+    writeDocFor(ctx.countryId);
+    var c = COUNTRIES.find(function(x){ return x.id === ctx.countryId; });
+    if (c) renderCountryCells(c);
+    closeCellNotePopover();
+  }
+
+  (function initCellNotePopover(){
+    var closeBtn = document.getElementById('cellNotePopClose');
+    var saveBtn = document.getElementById('cellNotePopSave');
+    if (closeBtn) closeBtn.addEventListener('click', closeCellNotePopover);
+    if (saveBtn) saveBtn.addEventListener('click', saveCellNotePopover);
+    document.addEventListener('keydown', function(ev){
+      if (ev.key === 'Escape' && cellNotePopCtx) closeCellNotePopover();
+    });
+    document.addEventListener('click', function(ev){
+      if (!cellNotePopCtx) return;
+      var pop = document.getElementById('cellNotePop');
+      if (!pop) return;
+      if (pop.contains(ev.target)) return;
+      if (ev.target.closest && ev.target.closest('.cell-note-btn')) return;
+      closeCellNotePopover();
+    });
+  })();
 
   function teardownChannels(){
     Object.keys(docChannels).forEach(function(cid){
