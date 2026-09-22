@@ -837,9 +837,13 @@ select#monthSelect{
     var el = document.getElementById('summaryTiles');
     if (!db || !currentMonth){ el.innerHTML = ''; return; }
     el.innerHTML = '<div style="padding:20px;color:var(--text3);">Cargando resumen…</div>';
-    db.from('cierre_regional_estados').select('pais_id,auditor_id,statuses')
-      .eq('mes', currentMonth).not('auditor_id', 'is', null).not('pais_id', 'is', null)
-      .then(function(res){
+    Promise.all([
+      db.from('cierre_regional_estados').select('pais_id,auditor_id,statuses')
+        .eq('mes', currentMonth).not('auditor_id', 'is', null).not('pais_id', 'is', null),
+      db.from('usuarios').select('nombre,rol,auditor_id,estado')
+    ]).then(function(results){
+        var res = results[0];
+        var usuariosRes = results[1];
         if (res.error){
           el.innerHTML = '<div style="padding:20px;color:var(--danger);">No se pudo cargar el resumen.</div>';
           return;
@@ -847,12 +851,29 @@ select#monthSelect{
         var rowsMap = {};
         (res.data || []).forEach(function(r){ rowsMap[r.pais_id + '_' + r.auditor_id] = r.statuses || {}; });
 
+        // "Por auditor" solo debe listar auditores que correspondan a un
+        // usuario real de esta plataforma (mismo criterio que resolveAuditor:
+        // auditor_id vinculado, o nombre coincidente) — no cualquier fila
+        // vieja de la tabla "auditores" sin usuario asociado.
+        var linkedAuditorIds = {};
+        var linkedAuditorNames = {};
+        ((usuariosRes && usuariosRes.data) || []).forEach(function(u){
+          if (u.rol !== 'auditor' || u.estado !== 'Activo') return;
+          if (u.auditor_id != null) linkedAuditorIds[u.auditor_id] = true;
+          var norm = (u.nombre || '').trim().toLowerCase();
+          if (norm) linkedAuditorNames[norm] = true;
+        });
+
         var slots = buildExpectedSlots();
         var global = statsForSlots(slots, rowsMap);
         var byPais = COUNTRIES.map(function(c){
           return { name: c.name, code: c.id, stats: statsForSlots(slots.filter(function(s){ return s.pais.id === c.id; }), rowsMap) };
         });
-        var byAuditor = AUDITORES.filter(function(a){ return a.estado === 'Activo'; }).map(function(a){
+        var byAuditor = AUDITORES.filter(function(a){
+          if (a.estado !== 'Activo') return false;
+          var norm = (a.nombre || '').trim().toLowerCase();
+          return !!(linkedAuditorIds[a.id] || linkedAuditorNames[norm]);
+        }).map(function(a){
           return { name: a.nombre, stats: statsForSlots(slots.filter(function(s){ return s.auditorId === a.id; }), rowsMap) };
         }).filter(function(x){ return x.stats.total > 0; });
 
