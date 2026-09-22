@@ -367,6 +367,13 @@ select#monthSelect{
 }
 .admin-form .af-actions{ display:flex; gap:8px; align-items:flex-end; }
 .admin-form .af-msg{ grid-column:1/-1; font-size:12px; color:var(--danger); }
+.admin-form .af-field .af-paises-list{ display:flex; flex-wrap:wrap; gap:6px 16px; padding-top:2px; }
+.admin-form .af-field .af-paises-list label{
+  display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500;
+  color:var(--text); text-transform:none; letter-spacing:normal; cursor:pointer;
+}
+.admin-form .af-field input[type="checkbox"]{ width:auto; accent-color:var(--primary); cursor:pointer; }
+.admin-form .af-field .af-paises-hint{ font-size:11.5px; color:var(--text3); margin-top:2px; }
 .subgroup-label{
   font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
   color:var(--primary); padding:10px 16px 4px; background:var(--primaryLight);
@@ -512,13 +519,18 @@ select#monthSelect{
             <div class="af-field"><label>Rol</label><select id="usrRol"><option value="auditor">Auditor</option><option value="admin">Administrador</option></select></div>
             <div class="af-field"><label>Auditor vinculado</label><select id="usrAuditorId"><option value="">(ninguno)</option></select></div>
             <div class="af-field"><label>Estado</label><select id="usrEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select></div>
+            <div class="af-field" id="usrPaisesField" style="grid-column:1/-1;">
+              <label>País(es) que debe llenar en el Checklist</label>
+              <div class="af-paises-list" id="usrPaisesList"></div>
+              <div class="af-paises-hint">Solo aplica para el rol Auditor · el Administrador ve todos los países.</div>
+            </div>
             <div class="af-actions">
               <button type="button" class="btn sm primary" id="btnGuardarUsuario">Guardar</button>
               <button type="button" class="btn sm" id="btnCancelarUsuario">Cancelar</button>
             </div>
             <div class="af-msg" id="usrMsg"></div>
           </div>
-          <div class="matrix-scroll"><table class="datatable"><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Auditor</th><th>Estado</th><th></th></tr></thead><tbody id="usuariosTbody"></tbody></table></div>
+          <div class="matrix-scroll"><table class="datatable"><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Auditor</th><th>País(es)</th><th>Estado</th><th></th></tr></thead><tbody id="usuariosTbody"></tbody></table></div>
         </section>
 
         <section class="panel" id="adminPanelActividades" hidden>
@@ -1338,6 +1350,16 @@ select#monthSelect{
     });
   }
 
+  function paisesLabelForAuditor(auditorId){
+    if (auditorId == null) return '—';
+    var a = AUDITORES.find(function(x){ return x.id === auditorId; });
+    if (!a || !(a.pais_ids || []).length) return '—';
+    return a.pais_ids.map(function(pid){
+      var code = PAIS_ID_TO_CODE[pid];
+      return (code && COUNTRY_NAME[code]) || ('#' + pid);
+    }).join(', ');
+  }
+
   function renderUsuariosTable(){
     var tbody = document.getElementById('usuariosTbody');
     if (!tbody) return;
@@ -1353,12 +1375,13 @@ select#monthSelect{
         '<td>' + (u.nombre || '') + '</td>' +
         '<td>' + (u.rol === 'admin' ? 'Administrador' : 'Auditor') + '</td>' +
         '<td>' + auditorNombre + '</td>' +
+        '<td>' + (u.rol === 'admin' ? 'Todos' : paisesLabelForAuditor(u.auditor_id)) + '</td>' +
         '<td><span class="pill ' + (u.estado === 'Activo' ? 'ok' : 'muted') + '">' + u.estado + '</span></td>' +
         '<td><button type="button" class="icon-btn" data-edit-usuario="' + u.id + '" title="Editar"><i class="ti ti-edit"></i></button> ' +
             '<button type="button" class="icon-btn" data-del-usuario="' + u.id + '" title="Eliminar"><i class="ti ti-trash"></i></button></td>' +
         '</tr>';
     });
-    tbody.innerHTML = html || '<tr><td colspan="6" style="color:var(--text3);">Sin usuarios.</td></tr>';
+    tbody.innerHTML = html || '<tr><td colspan="7" style="color:var(--text3);">Sin usuarios.</td></tr>';
     tbody.querySelectorAll('[data-edit-usuario]').forEach(function(btn){
       btn.addEventListener('click', function(){ openUsuarioForm(parseInt(btn.getAttribute('data-edit-usuario'), 10)); });
     });
@@ -1373,6 +1396,35 @@ select#monthSelect{
     sel.innerHTML = html;
     sel.value = (selected != null) ? String(selected) : '';
   }
+
+  function fillPaisesCheckboxes(selectedDbIds){
+    var list = document.getElementById('usrPaisesList');
+    if (!list) return;
+    var sel = selectedDbIds || [];
+    var html = '';
+    COUNTRIES.forEach(function(c){
+      var checked = sel.indexOf(c.dbId) !== -1 ? ' checked' : '';
+      html += '<label><input type="checkbox" value="' + c.dbId + '"' + checked + '> ' + c.name + '</label>';
+    });
+    list.innerHTML = html || '<span style="color:var(--text3);font-size:12px;">Sin países configurados.</span>';
+  }
+
+  function getSelectedPaisIds(){
+    return Array.prototype.slice.call(document.querySelectorAll('#usrPaisesList input[type="checkbox"]:checked'))
+      .map(function(cb){ return parseInt(cb.value, 10); });
+  }
+
+  function updatePaisesFieldVisibility(){
+    var rol = document.getElementById('usrRol').value;
+    document.getElementById('usrPaisesField').style.display = (rol === 'admin') ? 'none' : '';
+  }
+
+  document.getElementById('usrRol').addEventListener('change', updatePaisesFieldVisibility);
+  document.getElementById('usrAuditorId').addEventListener('change', function(){
+    var aid = this.value ? parseInt(this.value, 10) : null;
+    var a = aid != null ? AUDITORES.find(function(x){ return x.id === aid; }) : null;
+    fillPaisesCheckboxes(a ? a.pais_ids : []);
+  });
 
   function openUsuarioForm(id){
     var form = document.getElementById('formUsuario');
@@ -1389,6 +1441,8 @@ select#monthSelect{
       document.getElementById('usrRol').value = u.rol || 'auditor';
       fillAuditorSelect(document.getElementById('usrAuditorId'), u.auditor_id);
       document.getElementById('usrEstado').value = u.estado || 'Activo';
+      var au = u.auditor_id != null ? AUDITORES.find(function(x){ return x.id === u.auditor_id; }) : null;
+      fillPaisesCheckboxes(au ? au.pais_ids : []);
     } else {
       document.getElementById('usrUsuario').value = '';
       document.getElementById('usrNombre').value = '';
@@ -1397,12 +1451,41 @@ select#monthSelect{
       document.getElementById('usrRol').value = 'auditor';
       fillAuditorSelect(document.getElementById('usrAuditorId'), null);
       document.getElementById('usrEstado').value = 'Activo';
+      fillPaisesCheckboxes([]);
     }
+    updatePaisesFieldVisibility();
     form.hidden = false;
   }
 
   document.getElementById('btnNuevoUsuario').addEventListener('click', function(){ openUsuarioForm(null); });
   document.getElementById('btnCancelarUsuario').addEventListener('click', function(){ document.getElementById('formUsuario').hidden = true; });
+
+  // Sincroniza el país(es) asignado(s) con la tabla "auditores": si el
+  // usuario ya tiene un auditor vinculado, actualiza su pais_ids; si es
+  // auditor nuevo (sin vincular) y se marcó al menos un país, crea el
+  // registro en "auditores" y lo vincula automáticamente al usuario.
+  function guardarPaisesAuditor(rol, auditorIdRaw, nombreFallback, usuarioId, paisIds){
+    if (rol !== 'auditor') return Promise.resolve(null);
+    var auditorId = auditorIdRaw ? parseInt(auditorIdRaw, 10) : null;
+    if (auditorId != null){
+      return db.from('auditores').update({ pais_ids: paisIds }).eq('id', auditorId).then(function(res){
+        if (res.error) return res.error.message;
+        var a = AUDITORES.find(function(x){ return x.id === auditorId; });
+        if (a) a.pais_ids = paisIds;
+        return null;
+      });
+    }
+    if (!paisIds.length) return Promise.resolve(null);
+    return db.from('auditores').insert({ nombre: nombreFallback, pais_ids: paisIds, estado: 'Activo' }).select().single().then(function(res){
+      if (res.error) return res.error.message;
+      var newAuditor = res.data;
+      AUDITORES.push(newAuditor);
+      return db.from('usuarios').update({ auditor_id: newAuditor.id }).eq('id', usuarioId).then(function(res2){
+        if (res2.error) return res2.error.message;
+        return null;
+      });
+    });
+  }
 
   document.getElementById('btnGuardarUsuario').addEventListener('click', function(){
     var msg = document.getElementById('usrMsg'); msg.textContent = '';
@@ -1413,6 +1496,7 @@ select#monthSelect{
     var rol = document.getElementById('usrRol').value;
     var auditorId = document.getElementById('usrAuditorId').value;
     var estado = document.getElementById('usrEstado').value;
+    var paisIds = getSelectedPaisIds();
     if (!usuario){ msg.textContent = 'El usuario es obligatorio.'; return; }
     if (!id && !password){ msg.textContent = 'La contraseña es obligatoria para un usuario nuevo.'; return; }
     var payload = {
@@ -1423,11 +1507,15 @@ select#monthSelect{
       estado: estado
     };
     if (password) payload.password = password;
-    var q = id ? db.from('usuarios').update(payload).eq('id', id) : db.from('usuarios').insert(payload);
+    var q = id ? db.from('usuarios').update(payload).eq('id', id) : db.from('usuarios').insert(payload).select().single();
     q.then(function(res){
       if (res.error){ msg.textContent = 'Error al guardar: ' + res.error.message; return; }
-      document.getElementById('formUsuario').hidden = true;
-      loadUsuarios();
+      var savedId = id ? parseInt(id, 10) : (res.data && res.data.id);
+      guardarPaisesAuditor(rol, auditorId, nombre || usuario, savedId, paisIds).then(function(err){
+        if (err){ msg.textContent = 'Usuario guardado, pero hubo un error al asignar país(es): ' + err; loadUsuarios(); return; }
+        document.getElementById('formUsuario').hidden = true;
+        loadUsuarios();
+      });
     });
   });
 
